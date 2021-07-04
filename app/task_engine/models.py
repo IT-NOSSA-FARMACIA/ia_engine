@@ -194,8 +194,11 @@ class ScheduleEnvironmentVariable(models.Model):
     def __str__(self) -> str:
         return super().__str__()
 
-    def save(self):
-        self.value = signing.dumps(self.value)
+    def save(self): 
+        old_schedule_env = ScheduleEnvironmentVariable.objects.filter(id=self.id).first()
+        old_value = old_schedule_env.value if old_schedule_env else ""
+        if self.value != old_value:
+            self.value = signing.dumps(self.value)
         return super().save()
 
     @property
