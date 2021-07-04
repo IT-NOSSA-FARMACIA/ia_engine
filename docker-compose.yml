@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  web:
+    image: ia-engine
+    build:
+      context: ./app
+      dockerfile: ./Dockerfile
+    hostname: webapp.ia_engine
+    volumes:
+      - ./app:/app
+      - web_logs:/var/log/ia_engine
+    networks:
+      internal:
+        aliases:
+          - web.ia_engine
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    environment:
+      - IA_ENGINE_SERVICE=${IA_ENGINE_SERVICE:-development}
+    env_file:
+      - ia-engine.env
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+    environment:
+      - ACCEPT_EULA=Y  
+      - SA_PASSWORD=${SQL_SERVER_PASSWORD:-iaengine32K}      
+    volumes:
+      - mssql-server-data:/var/opt/mssql/data
+    networks:
+      internal:
+        aliases:
+          - sqlserver.iaengine
+    ports:
+      - "1433:1433"
+networks:
+  internal:
+volumes:
+  web_logs:
+  mssql-server-data:
