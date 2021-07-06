@@ -17,9 +17,49 @@ services:
       - "8000:8000"
       - "8001:8001"
     environment:
-      - IA_ENGINE_SERVICE=${IA_ENGINE_SERVICE:-development}
+      - IA_ENGINE_SERVICE=${IA_ENGINE_SERVICE:-development} #development production
     env_file:
       - ia-engine.env
+
+  celery:
+    image: ia-engine
+    build:
+      context: ./app
+      dockerfile: ./Dockerfile
+    hostname: celery.ia_engine
+    volumes:
+      - ./app:/app/
+      - celery_run:/var/run/celery
+      - celery_log:/var/log/celery
+      - web_logs:/var/log/ia_engine
+    networks:
+      internal:
+        aliases:
+          - celery.iaengine
+    ports:
+      - "8009:8000"
+    depends_on:
+      - memcached
+    environment:
+      - IA_ENGINE_SERVICE=${IA_ENGINE_SERVICE:-celery}
+      - IA_ENGINE_CELERY_ON=${IA_ENGINE_CELERY_ON:-1}
+    env_file:
+      - ia-engine.env
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+    volumes:
+      - ./app/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./app/staticfiles/:/app/static/  
+      - nginx_log:/var/log/nginx/
+    networks:
+      internal:
+        aliases:
+          - nginx.iaengine
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
@@ -34,8 +74,52 @@ services:
           - sqlserver.iaengine
     ports:
       - "1433:1433"
+
+  memcached:
+    image: memcached
+    hostname: memcached.iaengine
+    networks:
+      internal:
+        aliases:
+          - memcached.iaengine
+    ports:
+      - "11211:11211"
+
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: rabbitmq
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/mnesia/rabbit@rabbitmq
+      - rabbitmq_log:/var/log/rabbitmq/log
+    networks:
+      internal:
+        aliases:
+          - rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  celery_flower:
+    image: mher/flower
+    environment:
+      - FLOWER_PORT=5555
+    env_file:
+      - ia-engine.env
+    hostname: celeryflower
+    networks:
+      internal:
+        aliases:
+          - celeryflower
+    ports:
+      - "5555:5555"
+
 networks:
   internal:
 volumes:
   web_logs:
   mssql-server-data:
+  rabbitmq_data:
+  rabbitmq_log:
+  celery_run:
+  celery_log:
+  nginx_log:
