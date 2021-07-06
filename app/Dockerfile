@@ -35,13 +35,13 @@ RUN echo "Chegou aqui"
 COPY mssql-driver/msodbcsql17_17.7.2.1-1_amd64.deb .
 RUN apt install ./msodbcsql17_17.7.2.1-1_amd64.deb -y
 
-COPY --chown=iaengine:iaengine requirements.txt ${APP_HOME}
+COPY --chown=iaengine:iaengine requirements.txt ${APP_HOME} 
 COPY --chown=iaengine:iaengine entrypoint.sh /opt
 
-RUN chown -R iaengine:iaengine /app \
+RUN chown -R iaengine:iaengine ${APP_HOME} ${CELERY_RUN} ${CELERY_LOG} \
         ${WEB_LOG} && \
         chmod u+x /opt/entrypoint.sh ${CELERY_RUN} ${CELERY_LOG} && \
-        chmod -R g+rwx,o+rwx /app
+        chmod -R g+rwx,o+rwx ${APP_HOME}
 
 EXPOSE 8000
 
