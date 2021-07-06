@@ -34,7 +34,7 @@ def search_new_schedule():
         if schedule.cron:
             scheduler = CronScheduler(schedule.cron)
             if scheduler.time_for_execution():
-                execute_schedule(schedule.id)
+                execute_schedule.delay(schedule.id)
         elif (
             schedule.last_execution is None
             or timezone.now()
@@ -44,7 +44,7 @@ def search_new_schedule():
             + timedelta(hours=schedule.hours)
             - timedelta(seconds=1)
         ):
-            execute_schedule(schedule.id)
+            execute_schedule.delay(schedule.id)
 
 
 @task
@@ -93,9 +93,9 @@ def search_pending_tickets():
         ticket.execution_status = EXECUTION_STATUS_QUEUE
         ticket.save()
         print(ticket.execution_status)
-        process_ticket(ticket.id)
+        process_ticket.delay(ticket.id)
 
-
+@task
 def process_ticket(ticket_id):
     ticket = Ticket.objects.get(id=ticket_id)
     ticket.status = EXECUTION_STATUS_PROCESSING
