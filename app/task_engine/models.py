@@ -141,6 +141,7 @@ class ScheduleExecution(models.Model):
         max_length=2, choices=EXECUTION_STATUS_CHOICE, default=EXECUTION_STATUS_PENDING
     )
     execution_log = models.TextField(blank=True, null=True)
+    execution_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return super().__str__()
@@ -178,6 +179,7 @@ class TicketActionLog(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
     action = models.ForeignKey(Action, on_delete=models.DO_NOTHING)
     execution_log = models.TextField(blank=True, null=True)
+    execution_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return super().__str__()
