@@ -141,6 +141,7 @@ class ScheduleExecution(models.Model):
         max_length=2, choices=EXECUTION_STATUS_CHOICE, default=EXECUTION_STATUS_PENDING
     )
     execution_log = models.TextField(blank=True, null=True)
+    execution_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return super().__str__()
@@ -178,6 +179,7 @@ class TicketActionLog(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
     action = models.ForeignKey(Action, on_delete=models.DO_NOTHING)
     execution_log = models.TextField(blank=True, null=True)
+    execution_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return super().__str__()
@@ -194,8 +196,11 @@ class ScheduleEnvironmentVariable(models.Model):
     def __str__(self) -> str:
         return super().__str__()
 
-    def save(self):
-        self.value = signing.dumps(self.value)
+    def save(self): 
+        old_schedule_env = ScheduleEnvironmentVariable.objects.filter(id=self.id).first()
+        old_value = old_schedule_env.value if old_schedule_env else ""
+        if self.value != old_value:
+            self.value = signing.dumps(self.value)
         return super().save()
 
     @property
