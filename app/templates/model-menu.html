@@ -1,0 +1,65 @@
+{% load static %}
+<div id="sidebar" class='active'>
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <img src="{% static '/images/main_logo.png' %}" alt="" srcset="" width="100%">
+        </div>
+        <div class="sidebar-menu">
+            <ul class="menu">
+
+
+                <li class='sidebar-title'>Menu Principal</li>
+
+
+
+                <li class="sidebar-item active ">
+                    <a href="index.html" class='sidebar-link'>
+                        <i data-feather="home" width="20" style="color: rgb(6, 77, 6)"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+
+
+
+                <li class="sidebar-item  has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i data-feather="triangle" width="20"></i>
+                        <span>Integrações</span>
+                    </a>
+
+                    <ul class="submenu ">
+
+                        <li>
+                            <a href="component-alert.html">Listar</a>
+                        </li>
+
+                        <li>
+                            <a href="component-badge.html">Criar</a>
+                        </li>
+        
+                    </ul>
+
+                </li>
+
+                <li class="sidebar-item  has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i data-feather="briefcase" width="20"></i>
+                        <span>Extra Components</span>
+                    </a>
+                    <ul class="submenu ">
+                        <li>
+                            <a href="component-extra-avatar.html">Avatar</a>
+                        </li>
+                        <li>
+                            <a href="component-extra-divider.html">Divider</a>
+                        </li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+        <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+    </div>
+</div>
+

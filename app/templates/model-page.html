@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Voler Admin Dashboard</title>
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+
+    <link rel="stylesheet" href="{% static '/vendors/chartjs/Chart.min.css' %}">
+
+    <link rel="stylesheet" href="{% static '/vendors/perfect-scrollbar/perfect-scrollbar.css' %}">
+    <link rel="stylesheet" href="{% static '/css/app.css' %}">
+    <link rel="shortcut icon" href="{% static '/images/menu_icon.ico' %}" type="image/x-icon">
+
+</head>
+
+<body>
+    <div id="app">
+        
+        {% include "model-menu.html" %}
+
+        <div id="main">
+            {% include "model-header.html" %}
+
+            <div class="main-content container-fluid">
+                {% block content %} {% endblock %}
+            <footer>
+                {% include "model-footer.html" %}
+            </footer>
+        </div>
+    </div>
+    <script src="{% static '/js/feather-icons/feather.min.js' %}"></script>
+
+    <script src="{% static '/vendors/perfect-scrollbar/perfect-scrollbar.min.js' %}"></script>
+    <script src="{% static '/js/app.js' %}"></script>
+
+    <script src="{% static '/vendors/chartjs/Chart.min.js' %}"></script>
+    <script src="{% static '/vendors/apexcharts/apexcharts.min.js' %}"></script>
+    <script src="{% static '/js/pages/dashboard.js' %}"></script>
+
+    <script src="{% static '/js/main.js' %}"></script>
+</body>
+
+</html>
