@@ -1,19 +1,24 @@
-from typing import Dict, List, Tuple, Any
-from django.db import models
-from core.models import Team
-from django.contrib.auth.models import User
-from .choices import EXECUTION_STATUS_CHOICE, EXECUTION_STATUS_PENDING
+from typing import Dict, Tuple, Any
 from io import StringIO
 from contextlib import redirect_stdout
+
+from django.urls import reverse
 from django.core import signing
-import sys, traceback
+from django.db import models
+from django.contrib.auth.models import User
+
+from core.models import Team
+from .choices import EXECUTION_STATUS_CHOICE, EXECUTION_STATUS_PENDING
+
+import sys
+import traceback
 
 
 class Script(models.Model):
     code = models.TextField()
 
     def __str__(self) -> str:
-        return super().__str__()
+        return str(self.id)
 
     def get_output(self, binds):
         return self.output.format(**binds)
@@ -70,6 +75,10 @@ class Schedule(models.Model):
         return self.name
         # return super().__str__()
 
+    def get_html_hyperlink(self) -> str:
+        schedule_link = reverse("task_engine:schedule", args=(self.id,))
+        return f"<a href='{schedule_link}'>{self.name}</a>"
+
     class Meta:
         db_table = "schedule"
 
@@ -100,6 +109,10 @@ class Action(models.Model):
     def __str__(self) -> str:
         return self.name
         # return super().__str__()
+
+    def get_html_hyperlink(self) -> str:
+        action_link = reverse("task_engine:action", args=(self.id,))
+        return f"<a href='{action_link}'>{self.name}</a>"
 
     class Meta:
         db_table = "action"
@@ -144,7 +157,13 @@ class ScheduleExecution(models.Model):
     execution_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return super().__str__()
+        return f"{self.schedule.name} - {self.execution_status}"
+
+    def get_html_hyperlink(self) -> str:
+        schedule_execution_link = reverse(
+            "task_engine:schedule-execution", args=(self.id,)
+        )
+        return f"<a href='{schedule_execution_link}'>{self.id}</a>"
 
     class Meta:
         db_table = "schedule_execution"
@@ -152,12 +171,21 @@ class ScheduleExecution(models.Model):
 
 class Ticket(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    schedule_execution = models.ForeignKey(
+        ScheduleExecution, on_delete=models.CASCADE, blank=True, null=True
+    )
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     execution_status = models.CharField(
         max_length=2, choices=EXECUTION_STATUS_CHOICE, default=EXECUTION_STATUS_PENDING
     )
 
     def __str__(self) -> str:
-        return super().__str__()
+        return f"{self.id} - {self.schedule.name} - {self.execution_status}"
+
+    def get_html_hyperlink(self) -> str:
+        ticket_link = reverse("task_engine:ticket", args=(self.id,))
+        # schedule_link = reverse("schedule", args=(self.id, ))
+        return f"<a href='{ticket_link}'>{self.id}</a>"
 
     class Meta:
         db_table = "ticket"
@@ -169,7 +197,7 @@ class TicketParameter(models.Model):
     value = models.CharField(max_length=500)
 
     def __str__(self) -> str:
-        return super().__str__()
+        return f"{self.ticket.id} - {self.name}"
 
     class Meta:
         db_table = "ticket_parameter"
@@ -182,7 +210,7 @@ class TicketActionLog(models.Model):
     execution_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return super().__str__()
+        return f"{self.ticket.id} - {self.action.name}"
 
     class Meta:
         db_table = "ticket_action_log"
@@ -194,14 +222,16 @@ class ScheduleEnvironmentVariable(models.Model):
     value = models.CharField(max_length=500)
 
     def __str__(self) -> str:
-        return super().__str__()
+        return self.name
 
-    def save(self): 
-        old_schedule_env = ScheduleEnvironmentVariable.objects.filter(id=self.id).first()
+    def save(self, *args, **kwargs):
+        old_schedule_env = ScheduleEnvironmentVariable.objects.filter(
+            id=self.id
+        ).first()
         old_value = old_schedule_env.value if old_schedule_env else ""
         if self.value != old_value:
             self.value = signing.dumps(self.value)
-        return super().save()
+        return super().save(*args, **kwargs)
 
     @property
     def load_value(self) -> str:
