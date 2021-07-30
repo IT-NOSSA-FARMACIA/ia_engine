@@ -41,11 +41,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "crispy_forms",
+    "crispy_bootstrap5",
     # "django_celery_results",
     "django_extensions",
     "core",
     "task_engine",
+    "api_engine",
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -62,7 +69,7 @@ ROOT_URLCONF = "ia_engine.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # "DIRS": [],
+        #"DIRS": [],
         "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
