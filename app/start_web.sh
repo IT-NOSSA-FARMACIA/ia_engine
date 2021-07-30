@@ -5,6 +5,10 @@ shopt -s expand_aliases
 
 cd "/app"
 
+function install_dependencies() {
+  pip install -r /app/requirements.txt
+}
+
 function execute_development_server() {
   python manage.py runserver 0:8000
 }
@@ -19,13 +23,14 @@ function execute_gunicorn() {
   echo "finish executing gunicorn"
 }
 
-echo "aew"
-
 case ${IA_ENGINE_SERVICE:-development} in
 production)
-  if [ ${RUN_COLLECT_STATIC:-0} -eq 1 ] ; then
-      run_collectstatic
-  fi  
+  if [ ${RUN_COLLECT_STATIC:-0} -eq 1 ]; then
+    run_collectstatic
+  fi
+  if [ ${RUN_INSTALL_DEPENDENCIES:-0} -eq 1 ]; then
+    install_dependencies
+  fi
   execute_gunicorn
   ;;
 development)
