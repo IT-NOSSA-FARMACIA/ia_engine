@@ -1,0 +1,103 @@
+{% extends "model-page.html"%}
+{% block content %}
+{% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+<link rel="stylesheet" href="{% static '/vendors/codemirror/lib/codemirror.css' %}">
+<script src="{% static '/vendors/codemirror/lib/codemirror.js' %}"></script>
+<script src="{% static '/vendors/codemirror/mode/python/python.js' %}"></script>
+<script src="{% static '/vendors/codemirror/addon/selection/active-line.js' %}"></script>
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/monokai.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/darcula.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/dracula.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/colorforth.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/eclipse.css' %}">
+
+<style>
+.CodeMirror {border: 1px solid #aaa;}
+</style>
+
+<div class="page-title">
+    <h3>{% translate "API" %}</h3>
+</div>
+<section class="section">
+    <div class="card">
+        <div class="card-header">
+            API
+        </div>
+
+
+        <div class="card-body">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home"
+                        role="tab" aria-controls="home" aria-selected="true">Função</a>
+                </li>
+                {% if extra.function %}
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="environments-tab" data-bs-toggle="tab" href="#environments"
+                            role="tab" aria-controls="environments" aria-selected="false">Clientes</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <div class="card-body">
+                        {% if form.erros %}
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <div class="alert alert-danger">
+                                        <strong>{{ error|escape }}</strong>
+                                    </div>
+                                {% endfor %}
+                            {% endfor %}
+                        {% endif %}
+                        <form action=
+                            {% if extra.function%}
+                                {% url 'api_engine:function' extra.function.id %}
+                            {% else %}
+                                {% url 'api_engine:function' %}
+                            {% endif %}
+                            method='POST'>{% csrf_token %}
+                   
+                            {{ form.name|as_crispy_field }}
+                            {{ form.domain|as_crispy_field }}
+                            {{ form.url_name|as_crispy_field }}
+                            {{ form.http_method|as_crispy_field }}
+                            {{ form.description|as_crispy_field }}
+                            {{ form.code|as_crispy_field }}    
+                            {{ form.team|as_crispy_field }}
+                            {{ form.active|as_crispy_field }}
+                            <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
+                        </form>
+                    
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="environments" role="tabpanel" aria-labelledby="environments-tab">
+                    {% include "schedule/environment.html" %}
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    let python_editor = document.getElementsByClassName("python-editor");
+    
+    Array.prototype.forEach.call(python_editor, function(el) {
+        var editor = CodeMirror.fromTextArea(el, {
+            lineNumbers: true,
+            gutters: ["CodeMirror-linenumbers", "breakpoints"],
+            styleActiveLine: true,
+            matchBrackets: true,
+            theme: "default",
+            mode: "python",
+        });
+        editor.save()
+    });
+</script>
+
+{% endblock %}

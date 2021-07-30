@@ -1,8 +1,10 @@
 {% load static %}
+{% load menu_extras %}
 <div id="sidebar" class='active'>
     <div class="sidebar-wrapper active">
         <div class="sidebar-header">
             <img src="{% static '/images/main_logo.png' %}" alt="" srcset="" width="100%">
+            <h2 align="center">IA Engine</h2>
         </div>
         <div class="sidebar-menu">
             <ul class="menu">
@@ -12,49 +14,85 @@
 
 
 
-                <li class="sidebar-item active ">
-                    <a href="index.html" class='sidebar-link'>
+                <li class="sidebar-item {% active 'index' %}">
+                    <a href="{% url 'index' %}" class='sidebar-link'>
                         <i data-feather="home" width="20" style="color: rgb(6, 77, 6)"></i>
-                        <span>Dashboard</span>
+                        <span>Inicial</span>
                     </a>
                 </li>
 
-
-
-
-                <li class="sidebar-item  has-sub">
+                <li class="sidebar-item {% active 'task_engine:action-list, task_engine:action, task_engine:schedule-list, task_engine:schedule' %} has-sub">
                     <a href="#" class='sidebar-link'>
-                        <i data-feather="triangle" width="20"></i>
+                        <i data-feather="git-pull-request" width="20"></i>
                         <span>Integrações</span>
                     </a>
-
-                    <ul class="submenu ">
-
+                    <ul class="submenu {% active 'task_engine:action-list, task_engine:action, task_engine:schedule-list, task_engine:schedule' %}">
                         <li>
-                            <a href="component-alert.html">Listar</a>
+                            <a href="{% url 'task_engine:schedule-list' %}">Listar Integrações</a>
                         </li>
 
                         <li>
-                            <a href="component-badge.html">Criar</a>
+                            <a href="{% url 'task_engine:schedule' %}">Criar Integração</a>
                         </li>
-        
+
+                        <li>
+                            <a href="{% url 'task_engine:action-list' %}">Listar Ações</a>
+                        </li>    
+
+                        <li>
+                            <a href="{% url 'task_engine:action' %}">Criar Ação</a>
+                        </li>                             
                     </ul>
-
                 </li>
 
-                <li class="sidebar-item  has-sub">
+                <li class="sidebar-item {% active 'task_engine:schedule-execution-list, task_engine:schedule-execution, task_engine:ticket-list, task_engine:ticket' %} has-sub">
                     <a href="#" class='sidebar-link'>
-                        <i data-feather="briefcase" width="20"></i>
-                        <span>Extra Components</span>
+                        <i data-feather="settings" width="20"></i>
+                        <span>Execuções</span>
                     </a>
-                    <ul class="submenu ">
+                    <ul class="submenu {% active 'task_engine:schedule-execution-list, task_engine:schedule-execution, task_engine:ticket-list, task_engine:ticket' %}">
                         <li>
-                            <a href="component-extra-avatar.html">Avatar</a>
+                            <a href="{% url 'task_engine:schedule-execution-list' %}">Execuções Schedule</a>
                         </li>
+
                         <li>
-                            <a href="component-extra-divider.html">Divider</a>
-                        </li>
+                            <a href="{% url 'task_engine:ticket-list' %}">Tickets</a>
+                        </li>                          
                     </ul>
+                </li>
+
+                <li class="sidebar-item {% active 'api_engine:function-list, api_engine:function' %} has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i data-feather="zap" width="20"></i>
+                        <span>API Maker</span>
+                    </a>
+                    <ul class="submenu {% active 'api_engine:function-list, api_engine:function' %}">
+                        <li>
+                            <a href="{% url 'api_engine:function-list' %}">Listar API's</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'api_engine:function' %}">Criar API</a>
+                        </li>   
+                        <li>
+                            <a href="{% url 'task_engine:ticket-list' %}">Listar Dominios</a>
+                        </li>    
+                        <li>
+                            <a href="{% url 'task_engine:ticket-list' %}">Criar Dominio</a>
+                        </li>   
+                        <li>
+                            <a href="{% url 'task_engine:ticket-list' %}">Listar Clientes</a>
+                        </li>    
+                        <li>
+                            <a href="{% url 'task_engine:ticket-list' %}">Criar Cliente</a>
+                        </li>                       
+                    </ul>
+                </li>
+
+                <li class="sidebar-item {% active 'admin' %}">
+                    <a href="/admin" class='sidebar-link'>
+                        <i data-feather="tool" width="20" style="color: rgb(6, 77, 6)"></i>
+                        <span>Admin</span>
+                    </a>
                 </li>
 
             </ul>

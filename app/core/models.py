@@ -9,7 +9,7 @@ class Team(models.Model):
     last_updated_date = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return super().__str__()
+        return self.name
 
     class Meta:
         db_table = "team"

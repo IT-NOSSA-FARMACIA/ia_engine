@@ -24,8 +24,8 @@ function execute_gunicorn() {
 function execute_celery() {
   if [ ${IA_ENGINE_CELERY_ON:-1} -eq 1 ]
   then
-    rm /var/run/celery/*.pid
-    rm /var/run/celery/celerybeat-schedule
+    rm /var/run/celery/*.pid || echo "erro ao excluir pid"
+    rm /var/run/celery/celerybeat-schedule || echo "erro ao excluir celerybeat-schedule"
     bash start_celery_workers.sh
     bash start_celery_beat.sh
   fi

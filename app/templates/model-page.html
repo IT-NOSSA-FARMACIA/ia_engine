@@ -5,8 +5,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Voler Admin Dashboard</title>
-
+    <title>IA Engine - Addo Pharma</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
 
     <link rel="stylesheet" href="{% static '/vendors/chartjs/Chart.min.css' %}">
@@ -40,8 +41,12 @@
     <script src="{% static '/vendors/chartjs/Chart.min.js' %}"></script>
     <script src="{% static '/vendors/apexcharts/apexcharts.min.js' %}"></script>
     <script src="{% static '/js/pages/dashboard.js' %}"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
 
     <script src="{% static '/js/main.js' %}"></script>
+    {% block script %} {% endblock %}
 </body>
 
 </html>
