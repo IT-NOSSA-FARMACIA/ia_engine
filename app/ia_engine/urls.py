@@ -15,11 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic.base import RedirectView
 from core import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", views.index),
-    #path("core", include("core.urls")),
+    path("index/", views.index, name="index"),
+    path("", RedirectView.as_view(url="index", permanent=False)),
+    path("core", include("core.urls")),
     path("task_engine/", include("task_engine.urls")),
+    path("api/", include("api_engine.urls_functions")),
+    path("api_engine/", include("api_engine.urls")),
 ]
