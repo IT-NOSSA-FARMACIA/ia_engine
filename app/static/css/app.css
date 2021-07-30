@@ -1293,7 +1293,10 @@ footer {
   background-color: #ffcd56 !important;
 }
 .text-green {
-  color: #4bc0c0;
+  color: #055e47;
+}
+.text-green:hover {
+  color: #0b6b1b;
 }
 .bg-green {
   background-color: #4bc0c0 !important;
