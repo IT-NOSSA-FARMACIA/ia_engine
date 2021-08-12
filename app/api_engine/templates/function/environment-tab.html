@@ -1,0 +1,155 @@
+<div class="card-body">
+    {% if form.erros %}
+        {% for field in form %}
+            {% for error in field.errors %}
+                <div class="alert alert-danger">
+                    <strong>{{ error|escape }}</strong>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+
+                    
+    {% for environment in extra.environment_variable %} 
+        <div class="row">                                  
+            <div class="form-group col-6">
+                <label for="environment_key" class="form-label">Chave</label>
+                <input type="text" value={{ environment.name }} id="environment_key" class="textinput textInput form-control" disabled>
+            </div>                      
+            <input type="hidden" id="env-key-{{ environment.id }}" class="form-control" value="{{ environment.name }}">
+            <input type="hidden" id="env-value-{{ environment.id }}" class="form-control" value="{{ environment.load_value }}">                          
+            <div class="form-group col-4" style="margin-top: 30px">
+                <button type="button" class="btn btn-warning btn-edit-env" data-bs-toggle="modal" data-bs-target="#modal-environment" 
+                        id="btn-edit-env" env-id="{{ environment.id }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>                                
+                <button type="button" class="btn btn-danger btn-remove-env" data-bs-toggle="modal" data-bs-target="#modal-remove-environment" 
+                        id="btn-remove-env" env-id="{{ environment.id }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>  
+            </div>
+        </div>                     
+    {% endfor %}   
+    <div class="form-group col-4" style="margin-top: 30px">
+        <button type="button" class="btn btn-success btn-add-environment" data-bs-toggle="modal" data-bs-target="#modal-environment">Adicionar</button>                                
+    </div>
+
+
+    <!--Modal Variável de Ambiente -->
+    <div class="modal fade text-left modal-borderless" id="modal-environment"
+        tabindex="-1" role="dialog" aria-labelledby="myModalLabel1"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Variável de Ambiente</h5>
+                    <button type="button" class="close rounded-pill"
+                        data-bs-dismiss="modal" aria-label="Close">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <form action={% if extra.function %}{% url 'api_engine:environment-variable' extra.function.id %}{% endif %}
+                        method='POST'>{% csrf_token %}
+                    <input type="hidden" class="form-control" name="environment_id" id="environment-id">
+                    <div class="modal-body">
+                        <div class="row">                                  
+                            <div class="form-group col-">
+                                <label for="environment_name" class="form-label">Chave</label>
+                                <input type="text" id="environment-key" name="name" class="textinput textInput form-control">
+                            </div>                                                
+                        </div>  
+                        <div class="row">
+                            <div class="form-group col-">
+                                <label for="environment_name" class="form-label">Valor</label>
+                                <input type="text" id="environment-value" name="value" class="textinput textInput form-control">
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger"
+                            data-bs-dismiss="modal">
+                            <i class="bx bx-x d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Cancelar</span>
+                        </button>
+                        <button type="submit" class="btn btn-success ml-1">
+                            <i class="bx bx-check d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Salvar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>      
+
+
+    <!--Modal Exclui Variável de Ambiente -->
+    <div class="modal fade text-left" id="modal-remove-environment" tabindex="-1"
+        role="dialog" aria-labelledby="myModalLabel120"
+        aria-hidden="true">
+        <form action={% if extra.function %}{% url 'api_engine:environment-variable' extra.function.id %}{% endif %} method='DELETE'>{% csrf_token %}
+            <input type="hidden" class="form-control" name="environment_id" id="environment-id-to-remove">
+            <input type="hidden" name="method" value="DELETE">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger">
+                        <h5 class="modal-title white" id="title-remove-env">
+                            Variável de Ambiente</h5>
+                        <button type="button" class="close"
+                            data-bs-dismiss="modal" aria-label="Close">
+                            <i data-feather="x"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Tem certeza que deseja remover essa variável de ambiente?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"
+                            class="btn btn-light-secondary"
+                            data-bs-dismiss="modal">
+                            <i class="bx bx-x d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Cancelar</span>
+                        </button>
+                        <button type="submit" class="btn btn-danger ml-1" value="delete">
+                            <i class="bx bx-check d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Excluir</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block script %}
+<script>
+    $('.btn-edit-env').click(function (event) {
+        let env_id = $(this).attr("env-id");
+        let env_key_id = "env-key-" + env_id
+        let env_value_id= "env-value-" + env_id
+        let env_key = document.getElementById(env_key_id).value;
+        let env_value = document.getElementById(env_value_id).value;
+        document.getElementById("environment-key").value = env_key;
+        document.getElementById("environment-value").value = env_value;
+        document.getElementById("environment-id").value = env_id;
+        
+    });
+
+    $('.btn-add-environment').click(function (event) {
+        document.getElementById("environment-key").value = "";
+        document.getElementById("environment-value").value = "";
+        document.getElementById("environment-id").value = "";
+    });
+
+    $('.btn-remove-env').click(function (event) {
+        let env_id = $(this).attr("env-id");
+        let env_key_id = "env-key-" + env_id
+        let env_key = document.getElementById(env_key_id).value;
+        $('#title-remove-env').html("Excluir '" + env_key + "'");
+        document.getElementById("environment-id-to-remove").value = env_id;
+    });  
+    
+
+</script>
+{% endblock %}
