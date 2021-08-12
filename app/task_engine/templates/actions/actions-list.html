@@ -1,0 +1,92 @@
+{% extends "model-page.html"%}
+{% block content %}
+{% load i18n %}
+{% load static %}
+{% load list_extras %}
+
+
+
+<div class="page-title">
+    <h3>{% translate "Ações" %}</h3>
+</div>
+<section class="section">
+
+    <div class="card">
+        <div class="card-header">
+            Lista de ações
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="form-group mb-1">
+                    <input class="form-control" type="text" name="name" placeholder="Buscar por nome...">            
+                </div>
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            <form>
+            <table class="table table-striped mt-4 table-responsive-md">
+                <thead>
+                    <tr>
+                        <th>
+                            <a class="text-green" href="{% order_by_href "name" request.GET.order_by request.GET.name %}">
+                            {% order_by "name" request.GET.order_by as arrow_name %}
+                            {{ arrow_name | safe}}
+                            Nome 
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "team__name" request.GET.order_by request.GET.name %}">
+                            {% order_by "team__name" request.GET.order_by as arrow_team %}
+                            {{ arrow_team | safe}}
+                            Time
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "active" request.GET.order_by request.GET.name %}">
+                            {% order_by "active" request.GET.order_by as arrow_status %}
+                            {{ arrow_status | safe}}
+                            Status
+                            </a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for action in action_list %}
+                        <tr>
+                            <td>{{ action.get_html_hyperlink | safe }}</a></td>
+                            <td>{{ action.team.name }}</td>
+                            <td>
+                                {% if action.active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Disabled</span>
+                                {% endif %}
+                            </td>      
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" 
+                        href="?{% get_params_list request.GET %}&page={{ page_obj.previous_page_number }}">Anterior</a></li>
+                {% else %}
+                    <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+                {% endif %}
+
+                {% for object in page_obj.paginator.page_range %}
+                    <li class="page-item"><a class="page-link" href="?{% get_params_list request.GET %}&page={{ forloop.counter }}">{{ forloop.counter }}</a></li>
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" 
+                        href="?{% get_params_list request.GET %}&page={{ page_obj.next_page_number }}">Próximo</a></li>
+                {% else %}
+                    <li class="page-item disabled"><a class="page-link" href="#">Próximo</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

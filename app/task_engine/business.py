@@ -3,7 +3,10 @@ from typing import Dict, Type, List
 
 from django.db.models import Model
 from django.db.models import Q
+from django.contrib.auth.models import User
 
+from .choices import EXECUTION_STATUS_QUEUE
+from .tasks import process_ticket
 from .models import (
     Schedule,
     Script,
@@ -33,19 +36,21 @@ class ScheduleBusiness(pydantic.BaseModel):
     def factory(cls, model_class=Schedule) -> "ScheduleBusiness":
         return cls(model_class=model_class)
 
-    def update_or_create(self, schedule_id: int, params: Dict) -> Model:
+    def update_or_create(self, schedule_id: int, params: Dict, user: User) -> Model:
         # Avoid side effects
         params = deepcopy(params)
         script_code = params["script"]
         del params["script"]
         del params["action"]
-        if schedule_id:
+        params["last_updated_by"] = user
+        if schedule_id:            
             self.model_class.objects.filter(pk=schedule_id).update(**params)
             object_schedule = self.model_class.objects.get(pk=schedule_id)
             Script.objects.filter(pk=object_schedule.script.pk).update(code=script_code)
         else:
             script = Script.objects.create(code=script_code)
             params["script"] = script
+            params["created_by"] = user
             object_schedule = self.model_class.objects.create(**params)
         return object_schedule
 
@@ -126,16 +131,18 @@ class ActionBusiness(pydantic.BaseModel):
     def factory(cls, model_class=Action) -> "ActionBusiness":
         return cls(model_class=model_class)
 
-    def update_or_create(self, action_id: int, params: Dict) -> Model:
+    def update_or_create(self, action_id: int, params: Dict, user: User) -> Model:
         # Avoid side effects
         params = deepcopy(params)
         script_code = params["script"]
         del params["script"]
+        params["last_updated_by"] = user
         if action_id:
             self.model_class.objects.filter(pk=action_id).update(**params)
             object_action = self.model_class.objects.get(pk=action_id)
             Script.objects.filter(pk=object_action.script.pk).update(code=script_code)
         else:
+            params["created_by"] = user
             script = Script.objects.create(code=script_code)
             params["script"] = script
             object_action = self.model_class.objects.create(**params)
@@ -211,6 +218,15 @@ class TicketBusiness(pydantic.BaseModel):
 
     def get_ticket_parameters(self, ticket_id: int):
         return TicketParameter.objects.filter(ticket__id=ticket_id)
+
+    def reprocess_ticket(self, ticket_id: int):
+        ticket = self.get(ticket_id)
+        ticket.execution_status = EXECUTION_STATUS_QUEUE
+        ticket.save()
+        process_ticket.apply_async(
+            kwargs={"ticket_id": ticket.id}, queue="process-ticket"
+        )
+        return ticket
 
     def get_query_set(self, params: Dict):
         name = params.get("name")

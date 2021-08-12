@@ -1,0 +1,138 @@
+{% extends "model-page.html"%}
+{% block content %}
+{% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load execution_extras %}
+
+<link rel="stylesheet" href="{% static '/vendors/codemirror/lib/codemirror.css' %}">
+<script src="{% static '/vendors/codemirror/lib/codemirror.js' %}"></script>
+<script src="{% static '/vendors/codemirror/mode/python/python.js' %}"></script>
+<script src="{% static '/vendors/codemirror/addon/selection/active-line.js' %}"></script>
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/monokai.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/darcula.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/dracula.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/colorforth.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/eclipse.css' %}">
+
+<style>
+.CodeMirror {border: 1px solid #aaa;}
+</style>
+
+<div class="page-title">
+    <h3>{% translate "Execução" %}</h3>
+</div>
+<section class="section">
+    <div class="card">
+        <div class="card-header">
+            Execução
+        </div>
+
+
+        <div class="card-body">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home"
+                        role="tab" aria-controls="home" aria-selected="true">Execução</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="environments-tab" data-bs-toggle="tab" href="#tickets"
+                        role="tab" aria-controls="environments" aria-selected="false">Tickets</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <div class="card-body">
+                        {% if form.erros %}
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <div class="alert alert-danger">
+                                        <strong>{{ error|escape }}</strong>
+                                    </div>
+                                {% endfor %}
+                            {% endfor %}
+                        {% endif %}
+
+                        <div class="row mb-5">
+                            <div class="col-sm-6 col-lg-6 col-md-6 col-xs-6" align="left">
+                                <span class="badge {% badge_status_execution schedule_execution.execution_status %}" style="width: 100px; height: 30px; font-size: 15px">{{ schedule_execution.get_execution_status_display }}</span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                <b>ID</b>
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                <b>Data de Execução</b>
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                <b>Time</b>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                {{ schedule_execution.id }}
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                {{ schedule_execution.execution_date }}
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                {{ schedule_execution.schedule.team.name }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-12 col-lg-12 col-md-12 col-xs-12">
+                                <b>Integração</b>
+                            </div>
+
+                        </div>
+                        <div class="row mb-3">
+                             <div class="col-sm-12 col-lg-12 col-md-12 col-xs-12">
+                                {{ schedule_execution.schedule.name }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="exampleFormControlTextarea1" class="form-label"><b>Log de Execução</b></label>
+                            <textarea class="form-control" rows="10" disabled>{{ schedule_execution.execution_log }}</textarea>
+                        </div>   
+ 
+                    
+                    </div>
+                </div>
+
+                
+                <div class="tab-pane fade" id="tickets" role="tabpanel" aria-labelledby="tickets-tab">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Ticket ID</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                            <tbody>
+                                {% for ticket in tickets%}
+                                <tr>
+                                    <td><a href="#">{{ ticket.get_html_hyperlink|safe }}</a></td>
+                                    <td>
+                                    <span class="badge {% badge_status_execution ticket.execution_status %}">{{ ticket.get_execution_status_display }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}

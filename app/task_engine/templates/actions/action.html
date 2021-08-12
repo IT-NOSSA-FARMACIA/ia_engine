@@ -1,0 +1,104 @@
+{% extends "model-page.html"%}
+{% block content %}
+{% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+<link rel="stylesheet" href="{% static '/vendors/codemirror/lib/codemirror.css' %}">
+<script src="{% static '/vendors/codemirror/lib/codemirror.js' %}"></script>
+<script src="{% static '/vendors/codemirror/mode/python/python.js' %}"></script>
+<script src="{% static '/vendors/codemirror/addon/selection/active-line.js' %}"></script>
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/monokai.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/darcula.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/dracula.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/colorforth.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/eclipse.css' %}">
+
+<style>
+.CodeMirror {border: 1px solid #aaa;}
+</style>
+
+<div class="page-title">
+    <h3>{% translate "Ação" %}</h3>
+</div>
+<section class="section">
+    <div class="card">
+        {% comment %} <div class="card-header">
+            Ação
+        </div> {% endcomment %}
+
+
+
+
+        <div class="card-body">
+            {% if form.erros %}
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <div class="alert alert-danger">
+                            <strong>{{ error|escape }}</strong>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+            {% if messages %}
+                <div class="row">
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                <strong>{{ message }}</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            <form action=
+                    {% if action%}
+                        {% url 'task_engine:action' action.id %}
+                    {% else %}
+                        {% url 'task_engine:action' %}
+                    {% endif %}
+                    method='POST'>{% csrf_token %}
+        
+                {{ form.name|as_crispy_field }}
+                {{ form.description|as_crispy_field }}
+
+                <div id="div_id_script" class="mb-3">        
+                    <label for="id_script" class="form-label">
+                        Code
+                    </label>              
+                    <textarea name="script" cols="40" rows="10" value="{{ extra.script.id }}" class="python-editor textarea form-control" id="id_script">{{ extra.script.code }}</textarea>
+                </div>
+                
+
+                <div class="row">
+                    <div class="form-group col">
+                        {{ form.team|as_crispy_field }}
+                    </div>   
+
+                </div>                              
+                {{ form.active|as_crispy_field }}
+                <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
+            </form>            
+        </div>
+    </div>
+</section>
+
+<script>
+    let python_editor = document.getElementsByClassName("python-editor");
+    
+    Array.prototype.forEach.call(python_editor, function(el) {
+        var editor = CodeMirror.fromTextArea(el, {
+            lineNumbers: true,
+            gutters: ["CodeMirror-linenumbers", "breakpoints"],
+            styleActiveLine: true,
+            matchBrackets: true,
+            theme: "default",
+            mode: "python",
+        });
+        editor.save()
+    });
+    $(".alert-success").fadeTo(2000, 500).slideUp(500, function(){});
+</script>
+
+{% endblock %}

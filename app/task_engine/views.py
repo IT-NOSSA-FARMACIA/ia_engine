@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, reverse
 from django.views.generic import ListView, View
 from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
 from django.forms import model_to_dict
+from django.contrib.auth.decorators import login_required
 
 from .forms import (
     ScheduleForm,
@@ -25,6 +26,8 @@ from .models import (
     ScheduleExecution,
     Ticket,
 )
+from django.conf import settings
+from django.contrib import messages
 
 
 class ScheduleListView(ListView):
@@ -54,11 +57,12 @@ class ScheduleView(View):
         form = ScheduleForm(request.POST)
         if form.is_valid():
             object_schedule = self.business.update_or_create(
-                schedule_id=schedule_id, params=form.cleaned_data
+                schedule_id=schedule_id, params=form.cleaned_data, user=request.user
             )
             self.business.update_step_actions(
                 schedule=object_schedule, actions_id=actions_id
             )
+            messages.success(request, settings.FORM_SAVE_MESSAGE_SUCCESS)
             return redirect(reverse("task_engine:schedule", args=(object_schedule.id,)))
 
     def get(self, request: HttpRequest, schedule_id: int = None) -> HttpResponse:
@@ -109,6 +113,7 @@ class EnvironmentVariableView(View):
                 params=form.cleaned_data,
                 pk=request.POST.get("environment_id", 0),
             )
+            messages.success(request, settings.FORM_SAVE_MESSAGE_SUCCESS)
             return redirect(reverse("task_engine:schedule", args=(schedule_id,)))
 
     def get(self, request, schedule_id):
@@ -146,8 +151,9 @@ class ActionView(View):
         form = ActionForm(request.POST)
         if form.is_valid():
             object_action = self.business.update_or_create(
-                action_id=action_id, params=form.cleaned_data
+                action_id=action_id, params=form.cleaned_data, user=request.user
             )
+            messages.success(request, settings.FORM_SAVE_MESSAGE_SUCCESS)
             return redirect(reverse("task_engine:action", args=(object_action.id,)))
 
     def get(self, request: HttpRequest, action_id: int = None) -> HttpResponse:
@@ -229,8 +235,12 @@ class TicketView(View):
 
     def get(self, request: HttpRequest, ticket_id: int) -> HttpResponse:
         ticket = self.business.get(ticket_id=ticket_id)
-        ticket_executions = self.business.get_ticket_executions(ticket_id=ticket_id)
-        ticket_parameters = self.business.get_ticket_parameters(ticket_id=ticket_id)
+        ticket_executions = self.business.get_ticket_executions(
+            ticket_id=ticket_id
+        ).order_by("-id")
+        ticket_parameters = self.business.get_ticket_parameters(
+            ticket_id=ticket_id
+        ).order_by("name")
         return render(
             request,
             "ticket/ticket.html",
@@ -240,3 +250,16 @@ class TicketView(View):
                 "ticket_parameters": ticket_parameters,
             },
         )
+
+
+class ReprocessTicketView(View):
+    business_class = TicketBusiness
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.business = self.business_class.factory()
+
+    def post(self, request: HttpRequest, ticket_id: int) -> HttpResponse:
+        ticket = self.business.reprocess_ticket(ticket_id=ticket_id)
+        messages.success(request, "Ticket enviado para reprocessamento.")
+        return redirect(reverse("task_engine:ticket", args=(ticket.id,)))

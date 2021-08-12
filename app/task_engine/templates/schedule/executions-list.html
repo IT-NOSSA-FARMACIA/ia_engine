@@ -1,0 +1,84 @@
+{% extends "model-page.html"%}
+{% block content %}
+{% load i18n %}
+{% load static %}
+{% load list_extras %}
+{% load execution_extras %}
+
+
+
+<div class="page-title">
+    <h3>{% translate "Execuções" %}</h3>
+</div>
+<section class="section">
+
+    <div class="card">
+        <div class="card-header">
+            Lista de execuções
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="form-group mb-1">
+                    <input class="form-control" type="text" name="name" placeholder="Buscar por nome...">            
+                </div>
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            <form>
+
+            <table class="table table-striped mt-4 table-responsive-md">
+                <thead>
+                    <tr>
+                        <th>
+                            <a class="text-green" href="{% order_by_href "id" request.GET.order_by request.GET.name %}">
+                            {% order_by "id" request.GET.order_by as arrow_id %}
+                            {{ arrow_id | safe}}
+                            ID 
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "schedule__name" request.GET.order_by request.GET.name %}">
+                            {% order_by "schedule__name" request.GET.order_by as arrow_schedule %}
+                            {{ arrow_schedule | safe}}
+                            Integração
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "execution_date" request.GET.order_by request.GET.name %}">
+                            {% order_by "execution_date" request.GET.order_by as arrow_execution_date %}
+                            {{ arrow_execution_date | safe}}
+                            Data de Execução
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "schedule__team__name" request.GET.order_by request.GET.name %}">
+                            {% order_by "schedule__team_name" request.GET.order_by as arrow_team %}
+                            {{ arrow_team | safe}}
+                            Time
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "execution_status" request.GET.order_by %}">
+                            {% order_by "execution_status" request.GET.order_by as arrow_status %}
+                            {{ arrow_status | safe}}
+                            Status
+                            </a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for execution in object_list %}
+                        <tr>
+                            <td>{{ execution.get_html_hyperlink|safe }}</a></td>
+                            <td>{{ execution.schedule.get_html_hyperlink | safe }}</td>
+                            <td>{{ execution.execution_date }}</td>
+                            <td>{{ execution.schedule.team.name }}</td>
+                            <td><span class="badge {% badge_status_execution execution.execution_status %}">{{ execution.get_execution_status_display}}</span></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>            
+            {% include "pagination.html" %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}
