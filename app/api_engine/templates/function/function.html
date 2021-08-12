@@ -37,7 +37,11 @@
                 {% if extra.function %}
                     <li class="nav-item" role="presentation">
                         <a class="nav-link" id="environments-tab" data-bs-toggle="tab" href="#environments"
-                            role="tab" aria-controls="environments" aria-selected="false">Clientes</a>
+                            role="tab" aria-controls="environments" aria-selected="false">Environments</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="customers-tab" data-bs-toggle="tab" href="#customers"
+                            role="tab" aria-controls="customers" aria-selected="false">Parceiros</a>
                     </li>
                 {% endif %}
             </ul>
@@ -53,6 +57,18 @@
                                 {% endfor %}
                             {% endfor %}
                         {% endif %}
+                    {% if messages %}
+                        <div class="row">
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    <div class="alert {% if message.tags == "error" %} alert-danger {% else %} alert-{{ message.tags }} {% endif %}alert-dismissible fade show" role="alert">
+                                        <strong>{{ message }}</strong>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
                         <form action=
                             {% if extra.function%}
                                 {% url 'api_engine:function' extra.function.id %}
@@ -64,6 +80,20 @@
                             {{ form.name|as_crispy_field }}
                             {{ form.domain|as_crispy_field }}
                             {{ form.url_name|as_crispy_field }}
+                            <div id="full-url-div" class="mb-3">
+                                <label for="id_url_name" class="form-label requiredField">
+                                    Full URL
+                                </label>
+                                <input
+                                    type="text"
+                                    name="full_url"
+                                    value="{{ extra.function.full_url }}"
+                                    class="textinput textInput form-control"
+                                    required=""
+                                    id="id_full_url"
+                                    disabled
+                                />
+                            </div>
                             {{ form.http_method|as_crispy_field }}
                             {{ form.description|as_crispy_field }}
                             {{ form.code|as_crispy_field }}    
@@ -76,9 +106,13 @@
                 </div>
 
                 <div class="tab-pane fade" id="environments" role="tabpanel" aria-labelledby="environments-tab">
-                    {% include "schedule/environment.html" %}
+                    {% include "function/environment-tab.html" %}
                 </div>
-                
+
+                <div class="tab-pane fade" id="customers" role="tabpanel" aria-labelledby="customers-tab">
+                    {% include "function/customers-tab.html" %}
+                </div>
+
             </div>
         </div>
     </div>
@@ -98,6 +132,7 @@
         });
         editor.save()
     });
+    $(".alert-success").fadeTo(2000, 500).slideUp(500, function(){});
 </script>
 
 {% endblock %}

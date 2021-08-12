@@ -1,0 +1,200 @@
+{% extends "model-page.html"%}
+{% block content %}
+{% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load execution_extras %}
+
+<link rel="stylesheet" href="{% static '/vendors/codemirror/lib/codemirror.css' %}">
+<script src="{% static '/vendors/codemirror/lib/codemirror.js' %}"></script>
+<script src="{% static '/vendors/codemirror/mode/python/python.js' %}"></script>
+<script src="{% static '/vendors/codemirror/addon/selection/active-line.js' %}"></script>
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/monokai.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/darcula.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/dracula.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/colorforth.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/eclipse.css' %}">
+
+<style>
+.CodeMirror {border: 1px solid #aaa;}
+</style>
+
+<div class="page-title">
+    <h3>{% translate "Ticket" %}</h3>
+</div>
+<section class="section">
+    <div class="card">
+        {% comment %} <div class="card-header">
+            Detalhes Execução do Ticket
+        </div> {% endcomment %}
+
+        <div class="card-body">
+            {% if messages %}
+                <div class="row">
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                <strong>{{ message }}</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home"
+                        role="tab" aria-controls="home" aria-selected="true">Detalhes</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="environments-tab" data-bs-toggle="tab" href="#tickets"
+                        role="tab" aria-controls="environments" aria-selected="false">Execuções</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <div class="card-body">
+                             
+                        <div class="row mb-5">
+                            <div class="col-sm-10 col-lg-10 col-md-10 col-xs-10" align="left">
+                                <span class="badge {% badge_status_execution ticket.execution_status %}" style="width: 100px; height: 30px; font-size: 15px">{{ ticket.get_execution_status_display }}</span>
+                            </div>
+                                        
+                            <div class="col-sm-2 col-lg-2 col-md-2 col-xs-2" align="left">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-reprocess-ticket"><i data-feather="repeat" style="color: white"></i>&nbsp;Reprocessar</button>
+                            </div>                           
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                <b>ID</b>
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                <b>Data de Criação</b>
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                <b>Time</b>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                {{ ticket.id }}
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                {{ ticket.created_date }}
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                {{ ticket.schedule.team.name }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-12 col-lg-12 col-md-12 col-xs-12">
+                                <b>Integração</b>
+                            </div>
+
+                        </div>
+                        <div class="row mb-5">
+                             <div class="col-sm-12 col-lg-12 col-md-12 col-xs-12">
+                                {{ ticket.schedule.name }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parametro</th>
+                                            <th>Valor</th>
+                                        </tr>
+                                    </thead>
+                                <tbody>
+                                    {% for parameter in ticket_parameters %}
+                                    <tr>
+                                        <td>{{ parameter.name }}</td>
+                                        <td>{{ parameter.value }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                </table>
+                        </div>
+                        </div>   
+ 
+                    
+                    </div>
+                </div>
+
+                
+                <div class="tab-pane fade" id="tickets" role="tabpanel" aria-labelledby="tickets-tab">
+                    <div class="card-body">
+                        <div class="accordion" id="accordionExample">
+                            {% for execution in ticket_executions %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="header-{{ execution.id }}">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ execution.id }}" aria-expanded="false" aria-controls="#collapse-{{ execution.id }}">
+                                        <p><b>&nbsp;Action:&nbsp;</b> {{ execution.action.name}}</p>
+                                        <p><b>&nbsp;&nbsp;&nbsp;&nbsp;Data Execução:&nbsp;</b> {{ execution.execution_date}}</p>
+                                    </button>
+                                    </h2>
+                                    <div id="collapse-{{ execution.id }}" class="accordion-collapse collapse" aria-labelledby="header-{{ execution.id }}" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <div class="mb-3">
+                                            <label for="exampleFormControlTextarea1" class="form-label"><b>Log de Execução</b></label>
+                                            <textarea class="form-control" rows="10" disabled>{{ execution.execution_log }}</textarea>
+                                        </div>   
+                                    </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!--Modal Exclui Variável de Ambiente -->
+    <div class="modal fade text-left" id="modal-reprocess-ticket" tabindex="-1"
+        role="dialog" aria-labelledby="myModalLabel120"
+        aria-hidden="true">
+        <form action={% url 'task_engine:reprocess_ticket' ticket.id %} method='POST'>{% csrf_token %}   
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h5 class="modal-title white">Ticket {{ ticket.id }}</h5>
+                        <button type="button" class="close"
+                            data-bs-dismiss="modal" aria-label="Close">
+                            <i data-feather="x"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Tem certeza que deseja reprocessar este ticket?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"
+                            class="btn btn-light-secondary"
+                            data-bs-dismiss="modal">
+                            <i class="bx bx-x d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Cancelar</span>
+                        </button>
+                        <button type="submit" class="btn btn-success ml-1">
+                            <i class="bx bx-check d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block"><b>Sim</b></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+<script>
+    $(".alert-success").fadeTo(2000, 500).slideUp(500, function(){});
+</script>
+
+
+{% endblock %}

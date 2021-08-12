@@ -1,0 +1,85 @@
+{% extends "model-page.html"%}
+{% block content %}
+{% load i18n %}
+{% load static %}
+{% load list_extras %}
+{% load execution_extras %}
+
+
+
+<div class="page-title">
+    <h3>{% translate "Tickets" %}</h3>
+</div>
+<section class="section">
+
+    <div class="card">
+        <div class="card-header">
+            Lista de tickets
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="form-group mb-1">
+                    <input class="form-control" type="text" name="name" placeholder="Buscar por integração...">            
+                </div>
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            <form>
+
+            <table class="table table-striped mt-4 table-responsive-md">
+                <thead>
+                    <tr>
+                        <th>
+                            <a class="text-green" href="{% order_by_href "id" request.GET.order_by request.GET.name %}">
+                            {% order_by "id" request.GET.order_by as arrow_id %}
+                            {{ arrow_id | safe}}
+                            ID 
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "schedule__name" request.GET.order_by request.GET.name %}">
+                            {% order_by "schedule__name" request.GET.order_by as arrow_schedule %}
+                            {{ arrow_schedule | safe}}
+                            Integração
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "created_date" request.GET.order_by request.GET.name %}">
+                            {% order_by "created_date" request.GET.order_by as arrow_created_date %}
+                            {{ arrow_created_date | safe}}
+                            Data Criação
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "schedule__team__name" request.GET.order_by request.GET.name %}">
+                            {% order_by "schedule__team__name" request.GET.order_by as arrow_team %}
+                            {{ arrow_team | safe}}
+                            Time
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "execution_status" request.GET.order_by request.GET.name %}">
+                            {% order_by "execution_status" request.GET.order_by as arrow_status %}
+                            {{ arrow_status | safe}}
+                            Status
+                            </a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in object_list %}
+                        <tr>
+                            <td>{{ ticket.get_html_hyperlink|safe }}</a></td>
+                            <td>{{ ticket.schedule.get_html_hyperlink | safe }}</td>
+                            <td>{{ ticket.created_date }}</td>
+                            <td>{{ ticket.schedule.team.name }}</td>
+                            <td><span class="badge {% badge_status_execution ticket.execution_status %}">{{ ticket.get_execution_status_display}}</span></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+           {% include "pagination.html" %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}

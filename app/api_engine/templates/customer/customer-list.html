@@ -1,0 +1,68 @@
+{% extends "model-page.html"%}
+{% block content %}
+{% load i18n %}
+{% load static %}
+{% load list_extras %}
+{% load execution_extras %}
+
+
+
+<div class="page-title">
+    <h3>{% translate "Parceiros" %}</h3>
+</div>
+<section class="section">
+
+    <div class="card">
+        <div class="card-header">
+            Lista de Parceiros
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="form-group mb-1">
+                    <input class="form-control" type="text" name="name" placeholder="Buscar por nome...">            
+                </div>
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            <form>
+
+            <table class="table table-striped mt-4 table-responsive-md">
+                <thead>
+                    <tr>
+                        <th>
+                            <a class="text-green" href="{% order_by_href "name" request.GET.order_by request.GET.name %}">
+                            {% order_by "name" request.GET.order_by as arrow_name %}
+                            {{ arrow_name | safe}}
+                            Nome 
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "team__name" request.GET.order_by %}">
+                            {% order_by "team__name" request.GET.order_by as arrow_team %}
+                            {{ arrow_team | safe}}
+                            Time
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "created_date" request.GET.order_by request.GET.name %}">
+                            {% order_by "created_date" request.GET.order_by as arrow_created_date %}
+                            {{ arrow_created_date | safe}}
+                            Data de Criação
+                            </a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in object_list %}
+                        <tr>
+                            <td>{{ customer.get_html_hyperlink|safe }}</a></td>
+                            <td>{{ customer.team.name }}</td>
+                            <td>{{ customer.created_date }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>            
+            {% include "pagination.html" %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}

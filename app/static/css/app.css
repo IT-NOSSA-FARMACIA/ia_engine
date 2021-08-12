@@ -425,7 +425,7 @@ footer {
 }
 .form-group[class*="has-icon-"] .form-control:focus ~ .form-control-icon i,
 .form-group[class*="has-icon-"] .form-control:focus ~ .form-control-icon svg {
-  color: #5a8dee;
+  color: #2cc452;
 }
 .form-group[class*="has-icon-"] .form-control-icon {
   position: absolute;
@@ -1182,13 +1182,15 @@ footer {
   height: 1rem;
 }
 #auth {
-  background: #6c757d;
+  /* background: #0ee79f; */
+  /*background-image: linear-gradient(#0ee79f, #1aa375);*/
+  background-image: linear-gradient(#cce9df, #b3e4d3);
   min-height: 100vh;
   padding-top: 100px;
-  background-image: url(../images/background/auth.jpg);
+  /* background-image: url(../images/background/auth7.jpg); */
 }
 #auth .card {
-  box-shadow: 0 5px 15px rgba(36, 104, 146, 0.6);
+  box-shadow: 0 5px 15px rgba(180, 236, 194, 0.6);
   border: none;
 }
 #error {

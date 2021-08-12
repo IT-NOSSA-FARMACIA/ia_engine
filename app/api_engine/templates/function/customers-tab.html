@@ -1,0 +1,189 @@
+<div class="card-body">
+    {% if form.erros %}
+        {% for field in form %}
+            {% for error in field.errors %}
+                <div class="alert alert-danger">
+                    <strong>{{ error|escape }}</strong>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+
+    {% for cf in extra.customer_function %} 
+        <div class="row">                                  
+            <div class="form-group col-6">
+                <label for="customer" class="form-label">Parceiro</label>
+                <input type="text" value="{{ cf.customer.name }}" id="customer" class="textinput textInput form-control" disabled>
+            </div>                      
+            <input type="hidden" id="customer-name-{{ cf.customer.id }}" class="form-control" value="{{ cf.customer.name }}">
+            <input type="hidden" id="customer-token-{{ cf.customer.id }}" class="form-control" value="{{ cf.token_id }}">                          
+            <div class="form-group col-4" style="margin-top: 30px">
+                <button type="button" class="btn btn-warning btn-edit-customer" data-bs-toggle="modal" data-bs-target="#modal-customer" 
+                        id="btn-edit-customer" customer-id="{{ cf.customer.id }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>                                
+                <button type="button" class="btn btn-danger btn-remove-customer" data-bs-toggle="modal" data-bs-target="#modal-remove-customer" 
+                        id="btn-remove-customer" customer-id="{{ cf.customer.id }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>  
+            </div>
+        </div>                     
+    {% endfor %}   
+    <div class="form-group col-4" style="margin-top: 30px">
+        <button type="button" class="btn btn-success btn-add-customer" data-bs-toggle="modal" data-bs-target="#modal-new-customer">Adicionar</button>                                
+    </div>
+
+
+    <!--Modal Generate new token -->
+    <div class="modal fade text-left modal-borderless" id="modal-customer"
+        tabindex="-1" role="dialog" aria-labelledby="myModalLabel1"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Dados Acesso - Parceiro</h5>
+                    <button type="button" class="close rounded-pill"
+                        data-bs-dismiss="modal" aria-label="Close">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <form action={% if extra.function %}{% url 'api_engine:function-customer' extra.function.id %}{% endif %}
+                        method='PUT'>{% csrf_token %}
+                    <input type="hidden" name="method" value="PUT">
+                    <div class="modal-body">
+                        <div class="row">                                  
+                            <div class="form-group col-">
+                                <label for="customer-name-select" class="form-label">Parceiro</label>
+                                    <select class="form-control select form-select" id="customer-name-select" disabled>
+                                        <option value="">---------</option>
+                                        {% for customer in extra.customers %}
+                                            <option value="{{ customer.id }}">{{ customer.name }}</option>
+                                        {% endfor %}
+                                    </select>                              
+                            </div>        
+                            <input type="text" id="customer-id" name="customer_id" class="textinput textInput form-control" hidden>                                        
+                        </div>  
+                        <div class="row">
+                            <div class="form-group col-">
+                                <label for="customer-token" class="form-label">Token</label>
+                                <input type="text" id="customer-token" name="value" class="textinput textInput form-control" disabled>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger"
+                            data-bs-dismiss="modal">
+                            <i class="bx bx-x d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Cancelar</span>
+                        </button>
+                        <button type="submit" class="btn btn-success ml-1">
+                            <i class="bx bx-check d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Regerar Token</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>      
+
+
+    <!--Modal Exclui Variável de Ambiente -->
+    <div class="modal fade text-left" id="modal-remove-customer" tabindex="-1"
+        role="dialog" aria-labelledby="myModalLabel120"
+        aria-hidden="true">
+        <form action={% if extra.function %}{% url 'api_engine:function-customer' extra.function.id %}{% endif %} method='DELETE'>{% csrf_token %}
+            <input type="hidden" class="form-control" name="customer_id" id="customer-id-to-remove">
+            <input type="hidden" name="method" value="DELETE">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger">
+                        <h5 class="modal-title white" id="title-remove-env">
+                            Parceiro</h5>
+                        <button type="button" class="close"
+                            data-bs-dismiss="modal" aria-label="Close">
+                            <i data-feather="x"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Tem certeza que deseja remover esse parceiro da API?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"
+                            class="btn btn-light-secondary"
+                            data-bs-dismiss="modal">
+                            <i class="bx bx-x d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Cancelar</span>
+                        </button>
+                        <button type="submit" class="btn btn-danger ml-1" value="delete">
+                            <i class="bx bx-check d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Excluir</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <!--Modal Add Customer Token-->
+    <div class="modal fade text-left modal-borderless" id="modal-new-customer"
+        tabindex="-1" role="dialog" aria-labelledby="myModalLabel1"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Associar Parceiro</h5>
+                    <button type="button" class="close rounded-pill"
+                        data-bs-dismiss="modal" aria-label="Close">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <form action={% if extra.function %}{% url 'api_engine:function-customer' extra.function.id %}{% endif %}
+                        method='POST'>{% csrf_token %}
+                    <div class="modal-body">
+                        <div class="row">                                  
+                            <div class="form-group col-">
+                                <label for="customer-id-to-add" class="form-label">Parceiro</label>
+                                    <select name="customer_id" class="form-control select form-select" id="customer-id-to-add" required>
+                                        <option value="">---------</option>
+                                        {% for customer in extra.customers %}
+                                            <option value="{{ customer.id }}">{{ customer.name }}</option>
+                                        {% endfor %}
+                                    </select>                              
+                            </div>                                                
+                        </div>  
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger"
+                            data-bs-dismiss="modal">
+                            <i class="bx bx-x d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Cancelar</span>
+                        </button>
+                        <button type="submit" class="btn btn-success ml-1">
+                            <i class="bx bx-check d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Salvar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>  
+{% block script %}
+<script>
+    $('.btn-edit-customer').click(function (event) {
+        let customer_id = $(this).attr("customer-id");
+        let customer_token_id = "#customer-token-" + customer_id
+        let token = $(customer_token_id).val();
+        $("#customer-name-select").val(customer_id).change();  
+        $("#customer-token").val(token);      
+        $("#customer-id").val(customer_id);      
+    });
+    
+    $('.btn-remove-customer').click(function (event) {
+        let customer_id = $(this).attr("customer-id");
+        $("#customer-id-to-remove").val(customer_id);
+    });  
+</script>
+{% endblock %}

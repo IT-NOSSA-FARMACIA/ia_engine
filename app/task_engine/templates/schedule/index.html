@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="index.css">
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    </head>
+    <body>
+        
+        <div id="vue-app">
+            [[ message ]]
+        </div>
+        
+        <script>
+            var app = new Vue({
+                delimiters: ["[[", "]]"],
+                el: '#vue-app',
+                data: {
+                    message: 'Hello Vue!'
+                }
+            })
+        </script>
+    </body>
+</html>

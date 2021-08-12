@@ -1,0 +1,85 @@
+{% extends "model-page.html"%}
+{% block content %}
+{% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+<div class="page-title">
+    <h3>{% translate "Domínio" %}</h3>
+</div>
+<section class="section">
+    <div class="card">
+        {% comment %} <div class="card-header">
+            Domínio
+        </div> {% endcomment %}
+
+
+        <div class="card-body">
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <div class="card-body">
+                    {% if form.erros %}
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <div class="alert alert-danger">
+                                    <strong>{{ error|escape }}</strong>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if messages %}
+                        <div class="row">
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                        <strong>{{ message }}</strong>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    <form action=
+                            {% if extra.domain%}
+                                {% url 'api_engine:domain' extra.domain.id %}
+                            {% else %}
+                                {% url 'api_engine:domain' %}
+                            {% endif %}
+                            method='POST'>{% csrf_token %}
+                
+                        {{ form.name|as_crispy_field }}
+                        {{ form.url_name|as_crispy_field }}
+                        <div class="row">
+                            <div class="form-group col">
+                                {{ form.team|as_crispy_field }}
+                            </div>   
+
+                        </div>                              
+                        {{ form.active|as_crispy_field }}
+                        <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
+                    </form>
+                
+                </div>
+            </div>                
+        </div>
+    </div>
+</section>
+
+<script>
+    let python_editor = document.getElementsByClassName("python-editor");
+    
+    Array.prototype.forEach.call(python_editor, function(el) {
+        var editor = CodeMirror.fromTextArea(el, {
+            lineNumbers: true,
+            gutters: ["CodeMirror-linenumbers", "breakpoints"],
+            styleActiveLine: true,
+            matchBrackets: true,
+            theme: "default",
+            mode: "python",
+        });
+        editor.save()
+    });
+
+    $(".alert-success").fadeTo(2000, 500).slideUp(500, function(){});
+</script>
+
+{% endblock %}

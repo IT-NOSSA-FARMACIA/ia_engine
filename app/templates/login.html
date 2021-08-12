@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Engine - Addo Pharma</title>
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+
+    <link rel="stylesheet" href="{% static '/vendors/chartjs/Chart.min.css' %}">
+
+    <link rel="stylesheet" href="{% static '/vendors/perfect-scrollbar/perfect-scrollbar.css' %}">
+    <link rel="stylesheet" href="{% static '/css/app.css' %}">
+    <link rel="shortcut icon" href="{% static '/images/menu_icon.ico' %}" type="image/x-icon">
+</head>
+
+<body>
+    <div id="auth">
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-5 col-sm-12 mx-auto">
+                    <div class="card pt-4">
+                        <div class="card-body">
+                            <div class="text-center mb-5">
+                                <img src="{% static '/images/main_logo.png' %}" class='mb-4'>
+                                <h2 align="center">IA Engine</h2>                                
+                            </div>
+                            <form action="{% url 'login' %}" method="POST">{% csrf_token %}
+                                <div class="form-group position-relative has-icon-left">
+                                    <label for="username">Usuário</label>
+                                    <div class="position-relative">
+                                        <input type="text" class="form-control" id="username" name="username">
+                                        <div class="form-control-icon">
+                                            <i data-feather="user"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group position-relative has-icon-left">
+                                    <div class="clearfix">
+                                        <label for="password">Senha</label>
+                                        <a href="auth-forgot-password.html" class='float-end' style="color: green">
+                                            <small>Esqueceu a senha?</small>
+                                        </a>
+                                    </div>
+                                    <div class="position-relative">
+                                        <input type="password" class="form-control" id="password" name="password">
+                                        <div class="form-control-icon">
+                                            <i data-feather="lock"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input id="next_url" name="next_url" type="text" value="{{ next_url }}" hidden>
+                                {% if messages %}
+                                    <div class="row">
+                                        <ul class="messages">
+                                            {% for message in messages %}
+                                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                                    <strong>{{ message }}</strong>                                                    
+                                                </div>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                                <div class="clearfix">
+                                    <button class="btn btn-success float-end"><b>Entrar</b></button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="{% static '/js/feather-icons/feather.min.js' %}"></script>
+    <script src="{% static '/js/app.js' %}"></script>
+    <script src="{% static '/js/main.js' %}"></script>
+
+</body>
+
+</html>

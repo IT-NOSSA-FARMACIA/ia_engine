@@ -8,13 +8,13 @@
 
 
 <div class="page-title">
-    <h3>{% translate "APIs" %}</h3>
+    <h3>{% translate "Domínio" %}</h3>
 </div>
 <section class="section">
 
     <div class="card">
         <div class="card-header">
-            Lista de APIs
+            Lista de Domínios
         </div>
         <div class="card-body">
             <form>
@@ -31,28 +31,14 @@
                             <a class="text-green" href="{% order_by_href "name" request.GET.order_by request.GET.name %}">
                             {% order_by "name" request.GET.order_by as arrow_name %}
                             {{ arrow_name | safe}}
-                            Função 
+                            Nome 
                             </a>
                         </th>
                         <th>
-                            <a class="text-green"  href="{% order_by_href "domain__name" request.GET.order_by request.GET.name %}">
-                            {% order_by "domain__name" request.GET.order_by as arrow_domain %}
-                            {{ arrow_domain | safe}}
-                            Domínio
-                            </a>
-                        </th>
-                        <th>
-                            <a class="text-green"  href="{% order_by_href "domain__name" request.GET.order_by request.GET.name %}">
-                            {% order_by "domain__name" request.GET.order_by as arrow_domain__name %}
-                            {{ arrow_domain__name | safe}}
-                            URL
-                            </a>
-                        </th>
-                        <th>
-                            <a class="text-green"  href="{% order_by_href "method" request.GET.order_by request.GET.name %}">
-                            {% order_by "method" request.GET.order_by as arrow_method %}
-                            {{ arrow_method | safe}}
-                            Método
+                            <a class="text-green"  href="{% order_by_href "url_name" request.GET.order_by request.GET.name %}">
+                            {% order_by "url_name" request.GET.order_by as arrow_url_name %}
+                            {{ arrow_url_name | safe}}
+                            URL Name
                             </a>
                         </th>
                         <th>
@@ -60,6 +46,13 @@
                             {% order_by "team__name" request.GET.order_by as arrow_team %}
                             {{ arrow_team | safe}}
                             Time
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "created_date" request.GET.order_by request.GET.name %}">
+                            {% order_by "created_date" request.GET.order_by as arrow_created_date %}
+                            {{ arrow_created_date | safe}}
+                            Data de Criação
                             </a>
                         </th>
                         <th>
@@ -72,15 +65,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for function in object_list %}
+                    {% for domain in object_list %}
                         <tr>
-                            <td>{{ function.get_html_hyperlink|safe }}</a></td>
-                            <td>{{ function.domain.name | safe }}</td>
-                            <td>{{ function.full_url }}</td>
-                            <td>{{ function.get_http_method_display }}</td>
-                            <td>{{ function.team.name }}</td>
+                            <td>{{ domain.get_html_hyperlink|safe }}</a></td>
+                            <td>{{ domain.url_name | safe }}</td>                            
+                            <td>{{ domain.team.name }}</td>
+                            <td>{{ domain.created_date }}</td>
                             <td>
-                                {% if function.active %}
+                                {% if domain.active %}
                                     <span class="badge bg-success">Active</span>
                                 {% else %}
                                     <span class="badge bg-danger">Disabled</span>
@@ -89,9 +81,7 @@
                         </tr>
                     {% endfor %}
                 </tbody>
-            </table>
-
-            
+            </table>            
             {% include "pagination.html" %}
         </div>
     </div>
