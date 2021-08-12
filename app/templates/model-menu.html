@@ -61,12 +61,12 @@
                     </ul>
                 </li>
 
-                <li class="sidebar-item {% active 'api_engine:function-list, api_engine:function' %} has-sub">
+                <li class="sidebar-item {% active 'api_engine:function-list, api_engine:function, api_engine:domain-list, api_engine:domain, api_engine:customer-list, api_engine:customer' %} has-sub">
                     <a href="#" class='sidebar-link'>
                         <i data-feather="zap" width="20"></i>
                         <span>API Maker</span>
                     </a>
-                    <ul class="submenu {% active 'api_engine:function-list, api_engine:function' %}">
+                    <ul class="submenu {% active 'api_engine:function-list, api_engine:function, api_engine:domain-list, api_engine:domain, api_engine:customer-list, api_engine:customer' %}">
                         <li>
                             <a href="{% url 'api_engine:function-list' %}">Listar API's</a>
                         </li>
@@ -74,26 +74,28 @@
                             <a href="{% url 'api_engine:function' %}">Criar API</a>
                         </li>   
                         <li>
-                            <a href="{% url 'task_engine:ticket-list' %}">Listar Dominios</a>
+                            <a href="{% url 'api_engine:domain-list' %}">Listar Dominios</a>
                         </li>    
                         <li>
-                            <a href="{% url 'task_engine:ticket-list' %}">Criar Dominio</a>
+                            <a href="{% url 'api_engine:domain' %}">Criar Dominio</a>
                         </li>   
                         <li>
-                            <a href="{% url 'task_engine:ticket-list' %}">Listar Clientes</a>
+                            <a href="{% url 'api_engine:customer-list' %}">Listar Parceiros</a>
                         </li>    
                         <li>
-                            <a href="{% url 'task_engine:ticket-list' %}">Criar Cliente</a>
+                            <a href="{% url 'api_engine:customer' %}">Criar Parceiro</a>
                         </li>                       
                     </ul>
                 </li>
 
-                <li class="sidebar-item {% active 'admin' %}">
-                    <a href="/admin" class='sidebar-link'>
-                        <i data-feather="tool" width="20" style="color: rgb(6, 77, 6)"></i>
-                        <span>Admin</span>
-                    </a>
-                </li>
+                {% if request.user.is_staff %}
+                    <li class="sidebar-item {% active 'admin' %}">
+                        <a href="/admin" class='sidebar-link'>
+                            <i data-feather="tool" width="20" style="color: rgb(6, 77, 6)"></i>
+                            <span>Admin</span>
+                        </a>
+                    </li>
+                {% endif %}
 
             </ul>
         </div>
