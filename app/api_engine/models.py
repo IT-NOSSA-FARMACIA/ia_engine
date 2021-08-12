@@ -1,5 +1,6 @@
 from typing import Dict, Tuple, Any
 from django.db import models
+from django.core import signing
 from core.models import Team
 from django.contrib.auth.models import User
 from .choices import HTTP_METHOD_CHOICE, HTTP_METHOD_GET
@@ -30,6 +31,10 @@ class DomainFunctionService(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_html_hyperlink(self) -> str:
+        domain_link = reverse("api_engine:domain", args=(self.id,))
+        return f"<a href='{domain_link}'>{self.name}</a>"
 
     class Meta:
         db_table = "domain_function_service"
@@ -71,12 +76,15 @@ class FunctionService(models.Model):
         return f"/api/{self.domain.url_name}/{self.url_name}"
 
     def get_html_hyperlink(self) -> str:
-        function_link = reverse("api_engine:function", args=(self.id, ))
+        function_link = reverse("api_engine:function", args=(self.id,))
         return f"<a href='{function_link}'>{self.name}</a>"
 
-    def execute(self, request) -> Any:
-        exec(self.code, globals())            
-        return_data = main(request)
+    def execute(self, request, *args, **kwargs) -> Any:
+        exec(self.code, globals())
+        try:
+            return_data = main(request, *args, **kwargs)
+        except Exception as ex:
+            return {"error": str(ex)}
         return return_data
 
     class Meta:
@@ -105,6 +113,10 @@ class Customer(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_html_hyperlink(self) -> str:
+        customer_link = reverse("api_engine:customer", args=(self.id,))
+        return f"<a href='{customer_link}'>{self.name}</a>"
 
     class Meta:
         db_table = "customer"
@@ -136,3 +148,28 @@ class CustomerFunctionToken(models.Model):
 
     class Meta:
         db_table = "customer_function_token"
+
+
+class FunctionServiceEnvironmentVariable(models.Model):
+    function_service = models.ForeignKey(FunctionService, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    value = models.CharField(max_length=500)
+
+    def __str__(self) -> str:
+        return self.name
+
+    def save(self, *args, **kwargs):
+        old_schedule_env = FunctionServiceEnvironmentVariable.objects.filter(
+            id=self.id
+        ).first()
+        old_value = old_schedule_env.value if old_schedule_env else ""
+        if self.value != old_value:
+            self.value = signing.dumps(self.value)
+        return super().save(*args, **kwargs)
+
+    @property
+    def load_value(self) -> str:
+        return signing.loads(self.value)
+
+    class Meta:
+        db_table = "function_service_environment_variable"
