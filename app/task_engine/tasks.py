@@ -33,14 +33,13 @@ def search_new_schedule():
     #  para nao criar execução quando um schedule ainda estiver sendo executado
     for schedule in Schedule.objects.filter(active=True):
         if schedule.cron:
+            last_execution_to_compare_cron = schedule.last_execution.strftime("%Y-%m-%d %H:%M") if schedule.last_execution else None
             scheduler = CronScheduler(schedule.cron)
-            cron_execution_time = scheduler.next_execution_time.strftime(
-                "%Y-%m-%d %H:%M"
-            )
+            cron_execution_time = scheduler.next_execution_time.strftime("%Y-%m-%d %H:%M")
             if (
                 scheduler.time_for_execution()
                 and cron_execution_time
-                != schedule.last_execution.strftime("%Y-%m-%d %H:%M")
+                != last_execution_to_compare_cron
             ):
                 execute_schedule.delay(schedule.id)
         elif (
