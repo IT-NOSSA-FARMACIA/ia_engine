@@ -255,7 +255,9 @@ class FunctionCustomerView(View):
 
     def post(self, request: HttpRequest, function_id: int = 0) -> HttpResponse:
         customer_id = request.POST.get("customer_id")
-        if not self.business.validate_exist(function_id=function_id, customer_id=customer_id):
+        if not self.business.validate_exist(
+            function_id=function_id, customer_id=customer_id
+        ):
             _ = self.business.create(
                 function_id=function_id,
                 customer_id=customer_id,
@@ -264,9 +266,7 @@ class FunctionCustomerView(View):
             messages.success(request, "Parceiro associado com sucesso")
         else:
             messages.error(request, "Parceiro já se encontra associado")
-        return redirect(
-            reverse("api_engine:function", args=(function_id,))
-        )
+        return redirect(reverse("api_engine:function", args=(function_id,)))
 
     def get(self, request, function_id):
         if request.GET.get("method", "").upper() == "DELETE":
@@ -282,10 +282,10 @@ class FunctionCustomerView(View):
             user=request.user,
         )
         messages.success(request, "Token regerado com sucesso")
-        return redirect(
-            reverse("api_engine:function", args=(function_id,))
-        )
+        return redirect(reverse("api_engine:function", args=(function_id,)))
 
     def delete(self, request, function_id):
-        self.business.delete(function_id=function_id, customer_id=request.GET.get("customer_id"))
+        self.business.delete(
+            function_id=function_id, customer_id=request.GET.get("customer_id")
+        )
         return redirect(reverse("api_engine:function", args=(function_id,)))

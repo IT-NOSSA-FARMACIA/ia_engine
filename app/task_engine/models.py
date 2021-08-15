@@ -1,6 +1,8 @@
 from typing import Dict, Tuple, Any
 from io import StringIO
 from contextlib import redirect_stdout
+from simple_history.models import HistoricalRecords
+
 
 from django.urls import reverse
 from django.core import signing
@@ -16,6 +18,7 @@ import traceback
 
 class Script(models.Model):
     code = models.TextField()
+    history = HistoricalRecords()
 
     def __str__(self) -> str:
         return str(self.id)
@@ -70,6 +73,7 @@ class Schedule(models.Model):
     )
     script = models.ForeignKey(Script, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
+    history = HistoricalRecords()
 
     def __str__(self) -> str:
         return self.name
@@ -105,6 +109,7 @@ class Action(models.Model):
     )
     active = models.BooleanField(default=True)
     team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
+    history = HistoricalRecords()
 
     def __str__(self) -> str:
         return self.name
@@ -139,6 +144,7 @@ class StepSchedule(models.Model):
     )
     execution_order = models.IntegerField(default=0)
     stoppable = models.BooleanField(default=True)
+    history = HistoricalRecords()
 
     def __str__(self) -> str:
         return self.action.name
@@ -220,6 +226,7 @@ class ScheduleEnvironmentVariable(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     value = models.CharField(max_length=500)
+    history = HistoricalRecords()
 
     def __str__(self) -> str:
         return self.name

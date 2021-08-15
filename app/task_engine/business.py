@@ -43,10 +43,13 @@ class ScheduleBusiness(pydantic.BaseModel):
         del params["script"]
         del params["action"]
         params["last_updated_by"] = user
-        if schedule_id:            
+        if schedule_id:
             self.model_class.objects.filter(pk=schedule_id).update(**params)
             object_schedule = self.model_class.objects.get(pk=schedule_id)
-            Script.objects.filter(pk=object_schedule.script.pk).update(code=script_code)
+            object_schedule.save()  # it is required to enable the historical recording
+            script = Script.objects.get(pk=object_schedule.script.pk)
+            script.code = script_code
+            script.save()
         else:
             script = Script.objects.create(code=script_code)
             params["script"] = script
@@ -140,7 +143,10 @@ class ActionBusiness(pydantic.BaseModel):
         if action_id:
             self.model_class.objects.filter(pk=action_id).update(**params)
             object_action = self.model_class.objects.get(pk=action_id)
-            Script.objects.filter(pk=object_action.script.pk).update(code=script_code)
+            object_action.save()  # it is required to enable the historical recording
+            script = Script.objects.get(pk=object_action.script.pk)
+            script.code = script_code
+            script.save()
         else:
             params["created_by"] = user
             script = Script.objects.create(code=script_code)
