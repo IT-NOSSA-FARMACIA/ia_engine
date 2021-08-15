@@ -1,10 +1,13 @@
-from typing import Dict, Tuple, Any
+from typing import Any
+from simple_history.models import HistoricalRecords
+
 from django.db import models
 from django.core import signing
-from core.models import Team
 from django.contrib.auth.models import User
-from .choices import HTTP_METHOD_CHOICE, HTTP_METHOD_GET
 from django.urls import reverse
+
+from core.models import Team
+from .choices import HTTP_METHOD_CHOICE, HTTP_METHOD_GET
 
 
 class DomainFunctionService(models.Model):
@@ -28,6 +31,7 @@ class DomainFunctionService(models.Model):
     )
     team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
     active = models.BooleanField(default=True)
+    history = HistoricalRecords()
 
     def __str__(self) -> str:
         return self.name
@@ -67,6 +71,7 @@ class FunctionService(models.Model):
     )
     code = models.TextField()
     active = models.BooleanField(default=True)
+    history = HistoricalRecords()
 
     def __str__(self) -> str:
         return f"{self.domain.url_name}/{self.url_name}"
@@ -110,6 +115,7 @@ class Customer(models.Model):
         on_delete=models.DO_NOTHING,
         related_name="customer_last_updated_by",
     )
+    history = HistoricalRecords()
 
     def __str__(self) -> str:
         return self.name
@@ -142,6 +148,7 @@ class CustomerFunctionToken(models.Model):
         on_delete=models.DO_NOTHING,
         related_name="customer_function_token_last_updated_by",
     )
+    history = HistoricalRecords()
 
     def __str__(self) -> str:
         return f"{self.id} - {self.customer.name}"
@@ -154,6 +161,7 @@ class FunctionServiceEnvironmentVariable(models.Model):
     function_service = models.ForeignKey(FunctionService, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     value = models.CharField(max_length=500)
+    history = HistoricalRecords()
 
     def __str__(self) -> str:
         return self.name

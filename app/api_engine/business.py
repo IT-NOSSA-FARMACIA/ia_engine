@@ -37,6 +37,7 @@ class FunctionServiceBusiness(pydantic.BaseModel):
         if function_id:
             self.model_class.objects.filter(pk=function_id).update(**params)
             object_function = self.model_class.objects.get(pk=function_id)
+            object_function.save()  # it is required to enable the historical recording
         else:
             params["created_by"] = user
             object_function = self.model_class.objects.create(**params)
@@ -118,6 +119,7 @@ class DomainFunctionServiceBusiness(pydantic.BaseModel):
         if domain_id:
             self.model_class.objects.filter(pk=domain_id).update(**params)
             object_domain = self.model_class.objects.get(pk=domain_id)
+            object_domain.save()  # it is required to enable the historical recording
         else:
             params["created_by"] = user
             object_domain = self.model_class.objects.create(**params)
@@ -156,6 +158,7 @@ class CustomerBusiness(pydantic.BaseModel):
         if customer_id:
             self.model_class.objects.filter(pk=customer_id).update(**params)
             object_customer = self.model_class.objects.get(pk=customer_id)
+            object_customer.save()  # it is required to enable the historical recording
         else:
             params["created_by"] = user
             object_customer = self.model_class.objects.create(**params)
