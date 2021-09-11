@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import ListView, View
-from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
+from django.http import HttpRequest, HttpResponse, HttpResponseNotFound, JsonResponse
 from django.forms import model_to_dict
 from django.contrib.auth.decorators import login_required
 
@@ -28,6 +28,15 @@ from .models import (
 )
 from django.conf import settings
 from django.contrib import messages
+from .metrics.bar import (
+    get_graphics_bar_per_schedule,
+    get_graphics_bar_ticket_per_schedule,
+)
+
+from .metrics.area import (
+    get_graphics_area_schedule_per_time,
+    get_graphics_area_ticket_per_time,
+)
 
 
 class ScheduleListView(ListView):
@@ -263,3 +272,35 @@ class ReprocessTicketView(View):
         ticket = self.business.reprocess_ticket(ticket_id=ticket_id)
         messages.success(request, "Ticket enviado para reprocessamento.")
         return redirect(reverse("task_engine:ticket", args=(ticket.id,)))
+
+
+def graphics_bar_per_schedule(request):
+    time_to_search = request.GET.get("time", 0)
+    if not time_to_search:
+        time_to_search = 0
+    graphics_bar_data = get_graphics_bar_per_schedule(int(time_to_search))
+    return JsonResponse(graphics_bar_data)
+
+
+def graphics_bar_ticket_per_schedule(request):
+    time_to_search = request.GET.get("time", 0)
+    if not time_to_search:
+        time_to_search = 0
+    graphics_bar_data = get_graphics_bar_ticket_per_schedule(int(time_to_search))
+    return JsonResponse(graphics_bar_data)
+
+
+def graphics_area_schedule_per_time(request):
+    time_to_search = request.GET.get("time", 0)
+    if not time_to_search:
+        time_to_search = 0
+    graphics_bar_data = get_graphics_area_schedule_per_time(int(time_to_search))
+    return JsonResponse(graphics_bar_data)
+
+
+def graphics_area_ticket_per_time(request):
+    time_to_search = request.GET.get("time", 0)
+    if not time_to_search:
+        time_to_search = 0
+    graphics_bar_data = get_graphics_area_ticket_per_time(int(time_to_search))
+    return JsonResponse(graphics_bar_data)

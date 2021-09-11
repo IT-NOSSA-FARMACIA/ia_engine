@@ -17,6 +17,13 @@ from .models import (
 )
 
 
+@admin.register(Ticket)
+class TicketAdmin(admin.ModelAdmin):
+    list_display = ["id", "schedule", "execution_status", "created_date"]
+    search_fields = ("id", "schedule", "execution_status")
+    list_filter = ("schedule", "execution_status")
+
+
 # class TeamAdmin(admin.ModelAdmin):
 #     list_display = ['id', 'name', 'base', 'description']
 #     search_fields = ['id', 'name', 'base', 'description']
@@ -30,6 +37,5 @@ admin.site.register(Schedule)
 admin.site.register(Action)
 admin.site.register(StepSchedule)
 admin.site.register(ScheduleExecution)
-admin.site.register(Ticket)
 admin.site.register(ScheduleEnvironmentVariable)
 admin.site.register(TicketParameter)

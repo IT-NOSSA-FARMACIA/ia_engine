@@ -5,12 +5,17 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 
+from task_engine.metrics.cards import resume_executions
+
 import re
 
 PASSWORD_REGEX_RULES = r"(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
 
+
 def index(request):
-    return render(request, "index.html")
+    time_to_search = int(request.GET.get("time", 0))
+    dashboard_data = resume_executions(time_to_search)
+    return render(request, "index.html", dashboard_data)
 
 
 class LoginView(View):
@@ -37,6 +42,7 @@ class LogoutView(View):
         logout(request)
         return redirect(reverse("login"))
 
+
 class ChangePasswordView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         return render(request, "change-password.html")
@@ -46,21 +52,28 @@ class ChangePasswordView(View):
         new_password = request.POST.get("new_password")
         confirm_new_password = request.POST.get("confirm_new_password")
         if authenticate(username=request.user.username, password=password):
-            if new_password == confirm_new_password: 
+            if new_password == confirm_new_password:
                 if new_password != password:
                     password_regex_rules = re.compile(PASSWORD_REGEX_RULES)
                     if re.fullmatch(password_regex_rules, new_password):
-                        user = User.objects.get(username=request.user.username)               
+                        user = User.objects.get(username=request.user.username)
                         user.set_password(new_password)
                         user.save()
                         login(request, user)
                         messages.success(request, "Senha alterada com sucesso")
                     else:
-                        messages.error(request, "A nova senha deve conter números e letras, maiúculas e minúsculas, e ter no minímo 8 caracteres")                
+                        messages.error(
+                            request,
+                            "A nova senha deve conter números e letras, maiúculas e minúsculas, e ter no minímo 8 caracteres",
+                        )
                 else:
-                    messages.error(request, "A nova senha deve ser diferente da senha atual")             
+                    messages.error(
+                        request, "A nova senha deve ser diferente da senha atual"
+                    )
             else:
-                messages.error(request, "A nova senha e a confirmação de senha devem ser iguais") 
+                messages.error(
+                    request, "A nova senha e a confirmação de senha devem ser iguais"
+                )
         else:
             messages.error(request, "Senha inválida")
         return redirect(reverse("change-password"))
