@@ -1,0 +1,72 @@
+<div class="row">
+    <div class="col-md-12">
+        
+            <div class="card-header">
+                <h4>Execuções de Tickets por Integração</h4>
+            </div>
+            <div class="card-body">
+                <div id="bar-tickets"></div>
+            </div>
+       
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+
+function draw_bar_tickets(options){
+    let bar = new ApexCharts(document.querySelector("#bar-tickets"), options);
+    bar.render();
+}
+
+
+$.ajax({
+    url: "/task_engine/ticket/graphics_bar/?time=" + "{{ request.GET.time }}",
+    type: "GET",
+    //data: {},
+    success: function (json) {
+        let barOptions = {
+            series: json["series"],
+            chart: {
+                type: "bar",
+                height: 350,
+            },
+            plotOptions: {
+                bar: {
+                horizontal: false,
+                columnWidth: "55%",
+                //sendingShape: "rounded",
+                },
+            },
+            dataLabels: {
+                enabled: false,
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ["transparent"],
+            },
+            xaxis: {
+                categories: json["categories"],
+            },
+            yaxis: {
+                title: {
+                    text: "Execuções",
+                },
+            },
+            fill: {
+                opacity: 1,
+            },
+            colors: json["colors"],
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return val + " Execuções";
+                    },
+                },
+            },
+        };
+        draw_bar_tickets(barOptions);
+    }
+});
+
+</script>

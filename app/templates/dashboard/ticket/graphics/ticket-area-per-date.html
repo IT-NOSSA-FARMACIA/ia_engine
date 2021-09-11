@@ -1,0 +1,52 @@
+<div class="row">
+    <div class="col-md-12">
+        
+            <div class="card-header">
+                <h4>Tickets por Data</h4>
+            </div>
+            <div class="card-body">
+                <div id="area-ticket"></div>
+            </div>
+       
+    </div>
+</div>
+
+<script>
+function draw_area_ticket(options){
+    let bar = new ApexCharts(document.querySelector("#area-ticket"), options);
+    bar.render();
+}
+
+$.ajax({
+    url: "/task_engine/ticket/graphics_area/?time=" + "{{ request.GET.time }}",
+    type: "GET",
+    //data: {},
+    success: function (json) {
+        let areaOptions = {
+        series: json["series"],
+        chart: {
+            height: 350,
+            type: "area",
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        stroke: {
+            curve: "smooth",
+        },
+        xaxis: {
+            type: "datetime",
+            categories: json["categories"],
+        },
+        colors: json["colors"],
+        tooltip: {
+            x: {
+            format: "dd/MM/yy HH:mm",
+            },
+        },
+        };
+        draw_area_ticket(areaOptions);
+    }
+});
+
+</script>
