@@ -54,8 +54,10 @@
                                 {{ form.team|as_crispy_field }}
                             </div>   
 
-                        </div>                              
+                        </div>            
+                        {% if perms.api_engine.change_api %}                  
                         <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
+                        {% endif %}
                     </form>
                 
                 </div>

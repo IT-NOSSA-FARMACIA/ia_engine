@@ -17,7 +17,8 @@
                 <input type="text" value="{{ cf.customer.name }}" id="customer" class="textinput textInput form-control" disabled>
             </div>                      
             <input type="hidden" id="customer-name-{{ cf.customer.id }}" class="form-control" value="{{ cf.customer.name }}">
-            <input type="hidden" id="customer-token-{{ cf.customer.id }}" class="form-control" value="{{ cf.token_id }}">                          
+            <input type="hidden" id="customer-token-{{ cf.customer.id }}" class="form-control" value="{{ cf.token_id }}">       
+            {% if perms.api_engine.change_api %}                   
             <div class="form-group col-4" style="margin-top: 30px">
                 <button type="button" class="btn btn-warning btn-edit-customer" data-bs-toggle="modal" data-bs-target="#modal-customer" 
                         id="btn-edit-customer" customer-id="{{ cf.customer.id }}">
@@ -28,11 +29,14 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>  
             </div>
+            {% endif %}
         </div>                     
     {% endfor %}   
+    {% if perms.api_engine.change_api %}   
     <div class="form-group col-4" style="margin-top: 30px">
         <button type="button" class="btn btn-success btn-add-customer" data-bs-toggle="modal" data-bs-target="#modal-new-customer">Adicionar</button>                                
     </div>
+    {% endif %}
 
 
     <!--Modal Generate new token -->

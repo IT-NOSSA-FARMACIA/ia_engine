@@ -35,10 +35,12 @@
                         role="tab" aria-controls="home" aria-selected="true">Função</a>
                 </li>
                 {% if extra.function %}
+                    {% if perms.api_engine.change_api %}
                     <li class="nav-item" role="presentation">
                         <a class="nav-link" id="environments-tab" data-bs-toggle="tab" href="#environments"
                             role="tab" aria-controls="environments" aria-selected="false">Environments</a>
                     </li>
+                    {% endif %}
                     <li class="nav-item" role="presentation">
                         <a class="nav-link" id="customers-tab" data-bs-toggle="tab" href="#customers"
                             role="tab" aria-controls="customers" aria-selected="false">Parceiros</a>
@@ -99,15 +101,19 @@
                             {{ form.code|as_crispy_field }}    
                             {{ form.team|as_crispy_field }}
                             {{ form.active|as_crispy_field }}
+                            {% if perms.api_engine.change_api %}
                             <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
+                            {% endif %}
                         </form>
                     
                     </div>
                 </div>
 
+                {% if perms.api_engine.change_api %}   
                 <div class="tab-pane fade" id="environments" role="tabpanel" aria-labelledby="environments-tab">
                     {% include "function/environment-tab.html" %}
                 </div>
+                {% endif %}
 
                 <div class="tab-pane fade" id="customers" role="tabpanel" aria-labelledby="customers-tab">
                     {% include "function/customers-tab.html" %}

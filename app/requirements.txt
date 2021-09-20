@@ -37,3 +37,5 @@ pydantic==1.8.1
 crispy-bootstrap5==0.4
 django-crispy-forms==1.12.0
 django-simple-history==3.0.0
+openapi-schema-pydantic==1.2.0
+django-cors-headers==3.8.0

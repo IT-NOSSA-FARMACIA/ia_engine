@@ -31,9 +31,11 @@ SECRET_KEY = env.str("IA_ENGINE_SECRET_KEY")
 DEBUG = env.bool("IA_ENGINE_DEBUG", defaul=False)
 
 ALLOWED_HOSTS = env.list("API_ENGINE_ALLOWED_HOSTS", default=["*"])
+#CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+
 
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "simple_history",
     # "django_celery_results",
+    "corsheaders",
     "django_extensions",
     "core",
     "task_engine",
@@ -58,6 +61,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",

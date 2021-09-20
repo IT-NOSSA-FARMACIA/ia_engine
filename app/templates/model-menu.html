@@ -30,18 +30,20 @@
                         <li>
                             <a href="{% url 'task_engine:schedule-list' %}">Listar Integrações</a>
                         </li>
-
+                        {% if perms.task_engine.change_automation %}
                         <li>
                             <a href="{% url 'task_engine:schedule' %}">Criar Integração</a>
                         </li>
+                        {% endif %}
 
                         <li>
                             <a href="{% url 'task_engine:action-list' %}">Listar Ações</a>
                         </li>    
-
+                        {% if perms.task_engine.change_automation %}
                         <li>
                             <a href="{% url 'task_engine:action' %}">Criar Ação</a>
-                        </li>                             
+                        </li>      
+                        {% endif %}                       
                     </ul>
                 </li>
 
@@ -70,21 +72,27 @@
                         <li>
                             <a href="{% url 'api_engine:function-list' %}">Listar API's</a>
                         </li>
+                        {% if perms.api_engine.change_api %}
                         <li>
                             <a href="{% url 'api_engine:function' %}">Criar API</a>
                         </li>   
+                        {% endif %}
                         <li>
                             <a href="{% url 'api_engine:domain-list' %}">Listar Dominios</a>
                         </li>    
+                        {% if perms.api_engine.change_api %}
                         <li>
                             <a href="{% url 'api_engine:domain' %}">Criar Dominio</a>
                         </li>   
+                        {% endif %}
                         <li>
                             <a href="{% url 'api_engine:customer-list' %}">Listar Parceiros</a>
                         </li>    
+                        {% if perms.api_engine.change_api %}
                         <li>
                             <a href="{% url 'api_engine:customer' %}">Criar Parceiro</a>
-                        </li>                       
+                        </li>      
+                        {% endif %}                 
                     </ul>
                 </li>
 

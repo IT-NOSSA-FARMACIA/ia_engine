@@ -36,7 +36,7 @@
                     <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home"
                         role="tab" aria-controls="home" aria-selected="true">Integração</a>
                 </li>
-                {% if schedule %}
+                {% if schedule and perms.task_engine.change_automation %}
                     <li class="nav-item" role="presentation">
                         <a class="nav-link" id="environments-tab" data-bs-toggle="tab" href="#environments"
                             role="tab" aria-controls="environments" aria-selected="false">Environments</a>
@@ -162,7 +162,9 @@
                                 <button type="button" class="btn btn-success mb-4" v-on:click="addNewTodo"><i data-feather="plus" width="20" style="color: white"></i></button>
                             </div>
                             {{ form.active|as_crispy_field }}
+                            {% if perms.task_engine.change_automation %}
                             <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
+                            {% endif %}
                         </form>
                     
                     </div>

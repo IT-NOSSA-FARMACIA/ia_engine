@@ -84,6 +84,66 @@ class FunctionService(models.Model):
         function_link = reverse("api_engine:function", args=(self.id,))
         return f"<a href='{function_link}'>{self.name}</a>"
 
+    def get_openapi_schema(self):
+        from openapi_schema_pydantic import OpenAPI
+        from openapi_schema_pydantic.util import (
+            PydanticSchema,
+            construct_open_api_with_schema_class,
+        )
+
+        exec(self.code, globals())
+        content_request = {}
+        content_response = {}
+        try:
+            content_request["application/json"] = {
+                "schema": PydanticSchema(schema_class=Request)
+            }
+        except NameError:
+            pass
+
+        try:
+            content_response["application/json"] = {
+                "schema": PydanticSchema(schema_class=Response)
+            }
+        except NameError:
+            pass
+
+        open_api_obj = OpenAPI.parse_obj(
+            {
+                "info": {
+                    "title": f"{self.name}",
+                    "version": "v1",
+                    "description": f"{self.description}",
+                },
+                "paths": {
+                    f"{self.full_url}": {
+                        f"{self.get_http_method_display().lower()}": {
+                            "requestBody": {"content": content_request},
+                            "responses": {
+                                "200": {
+                                    "description": "",
+                                    "content": content_response,
+                                }
+                            },
+                        }
+                    },
+                },
+                "components": {
+                    "securitySchemes": {
+                        "Api-Key": {
+                            "type": "http",
+                            "scheme": "bearer",
+                            "bearerFormat": "JWT",
+                        }
+                    }
+                },
+            }
+        )
+        open_api = construct_open_api_with_schema_class(open_api_obj)
+        open_api.openapi = "3.0.0"
+        openapi_json = open_api.json(by_alias=True, exclude_none=True, indent=4)
+        return openapi_json
+
     def execute(self, request, *args, **kwargs) -> Any:
         exec(self.code, globals())
         try:

@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, reverse
 from django.views.generic import ListView, View
 from django.http import HttpRequest, HttpResponse, HttpResponseNotFound, JsonResponse
 from django.forms import model_to_dict
-from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import permission_required
 
 from .forms import (
     ScheduleForm,
@@ -39,6 +40,7 @@ from .metrics.area import (
 )
 
 
+@method_decorator(permission_required(settings.AUTOMATION_VIEWER), name="get")
 class ScheduleListView(ListView):
     template_name = "schedule/schedule-list.html"
     paginate_by = 5
@@ -61,6 +63,7 @@ class ScheduleView(View):
         super().__init__(*args, **kwargs)
         self.business = self.business_class.factory()
 
+    @method_decorator(permission_required(settings.AUTOMATION_DEVELOPER))
     def post(self, request: HttpRequest, schedule_id: int = 0) -> HttpResponse:
         actions_id = request.POST.getlist("action")
         form = ScheduleForm(request.POST)
@@ -74,6 +77,7 @@ class ScheduleView(View):
             messages.success(request, settings.FORM_SAVE_MESSAGE_SUCCESS)
             return redirect(reverse("task_engine:schedule", args=(object_schedule.id,)))
 
+    @method_decorator(permission_required(settings.AUTOMATION_VIEWER))
     def get(self, request: HttpRequest, schedule_id: int = None) -> HttpResponse:
         if schedule_id:
             schedule = self.business.get(schedule_id=schedule_id)
@@ -114,6 +118,7 @@ class EnvironmentVariableView(View):
         super().__init__(*args, **kwargs)
         self.business = self.business_class.factory()
 
+    @method_decorator(permission_required(settings.AUTOMATION_DEVELOPER))
     def post(self, request, schedule_id):
         form = ScheduleEnvironmentVariableForm(request.POST)
         if form.is_valid():
@@ -125,16 +130,19 @@ class EnvironmentVariableView(View):
             messages.success(request, settings.FORM_SAVE_MESSAGE_SUCCESS)
             return redirect(reverse("task_engine:schedule", args=(schedule_id,)))
 
+    @method_decorator(permission_required(settings.AUTOMATION_DEVELOPER))
     def get(self, request, schedule_id):
         if request.GET.get("method", "").upper() == "DELETE":
             return self.delete(request, schedule_id)
         return HttpResponseNotFound()
 
+    @method_decorator(permission_required(settings.AUTOMATION_DEVELOPER))
     def delete(self, request, schedule_id):
         self.business.delete(environment_id=request.GET.get("environment_id"))
         return redirect(reverse("task_engine:schedule", args=(schedule_id,)))
 
 
+@method_decorator(permission_required(settings.AUTOMATION_VIEWER), name="get")
 class ActionListView(ListView):
     template_name = "actions/actions-list.html"
     paginate_by = 5
@@ -156,6 +164,7 @@ class ActionView(View):
         super().__init__(*args, **kwargs)
         self.business = self.business_class.factory()
 
+    @method_decorator(permission_required(settings.AUTOMATION_DEVELOPER))
     def post(self, request: HttpRequest, action_id: int = 0) -> HttpResponse:
         form = ActionForm(request.POST)
         if form.is_valid():
@@ -165,6 +174,7 @@ class ActionView(View):
             messages.success(request, settings.FORM_SAVE_MESSAGE_SUCCESS)
             return redirect(reverse("task_engine:action", args=(object_action.id,)))
 
+    @method_decorator(permission_required(settings.AUTOMATION_VIEWER))
     def get(self, request: HttpRequest, action_id: int = None) -> HttpResponse:
         if action_id:
             action = self.business.get(action_id=action_id)
@@ -189,6 +199,7 @@ class ActionView(View):
         return kwargs
 
 
+@method_decorator(permission_required(settings.AUTOMATION_VIEWER), name="get")
 class ScheduleExecutionListView(ListView):
     template_name = "schedule/executions-list.html"
     paginate_by = 20
@@ -211,6 +222,7 @@ class ScheduleExecutionView(View):
         super().__init__(*args, **kwargs)
         self.business = self.business_class.factory()
 
+    @method_decorator(permission_required(settings.AUTOMATION_VIEWER))
     def get(self, request: HttpRequest, execution_id: int) -> HttpResponse:
         schedule_execution = self.business.get(execution_id=execution_id)
         tickets = self.business.get_tickets(execution_id=execution_id)
@@ -221,6 +233,7 @@ class ScheduleExecutionView(View):
         )
 
 
+@method_decorator(permission_required(settings.AUTOMATION_VIEWER), name="get")
 class TicketListView(ListView):
     template_name = "ticket/ticket-list.html"
     paginate_by = 20
@@ -242,6 +255,7 @@ class TicketView(View):
         super().__init__(*args, **kwargs)
         self.business = self.business_class.factory()
 
+    @method_decorator(permission_required(settings.AUTOMATION_VIEWER))
     def get(self, request: HttpRequest, ticket_id: int) -> HttpResponse:
         ticket = self.business.get(ticket_id=ticket_id)
         ticket_executions = self.business.get_ticket_executions(
@@ -268,6 +282,7 @@ class ReprocessTicketView(View):
         super().__init__(*args, **kwargs)
         self.business = self.business_class.factory()
 
+    @method_decorator(permission_required(settings.AUTOMATION_DEVELOPER))
     def post(self, request: HttpRequest, ticket_id: int) -> HttpResponse:
         ticket = self.business.reprocess_ticket(ticket_id=ticket_id)
         messages.success(request, "Ticket enviado para reprocessamento.")

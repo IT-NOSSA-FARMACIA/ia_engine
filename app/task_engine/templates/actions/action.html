@@ -78,7 +78,9 @@
 
                 </div>                              
                 {{ form.active|as_crispy_field }}
+                {% if perms.task_engine.change_automation %}
                 <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
+                {% endif %}
             </form>            
         </div>
     </div>
