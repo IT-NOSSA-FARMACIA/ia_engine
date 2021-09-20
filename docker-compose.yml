@@ -112,7 +112,13 @@ services:
           - celeryflower
     ports:
       - "5555:5555"
-
+  swagger:
+    image: swaggerapi/swagger-ui
+    hostname: swaggerapi
+    networks:
+      internal:
+        aliases:
+          - swaggerapi
 networks:
   internal:
 volumes:
