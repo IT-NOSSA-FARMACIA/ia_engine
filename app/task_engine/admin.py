@@ -19,7 +19,7 @@ from .models import (
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ["id", "schedule", "execution_status", "created_date"]
+    list_display = ["id", "schedule", "execution_status", "created_date_ticket"]
     search_fields = ("id", "schedule", "execution_status")
     list_filter = ("schedule", "execution_status")
 

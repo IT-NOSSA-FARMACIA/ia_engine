@@ -43,7 +43,7 @@
                         </th>
                         <th>
                             <a class="text-green"  href="{% order_by_href "created_date" request.GET.order_by request.GET.name %}">
-                            {% order_by "created_date" request.GET.order_by as arrow_created_date %}
+                            {% order_by "created_date_ticket" request.GET.order_by as arrow_created_date %}
                             {{ arrow_created_date | safe}}
                             Data Criação
                             </a>

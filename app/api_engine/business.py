@@ -13,6 +13,8 @@ from .models import (
     Customer,
 )
 from .utils import generate_token
+from core.utils import validate_team_user, get_user_team
+from .exceptions import ObjectNotFound
 import pydantic
 
 
@@ -43,10 +45,13 @@ class FunctionServiceBusiness(pydantic.BaseModel):
             object_function = self.model_class.objects.create(**params)
         return object_function
 
-    def get(self, schedule_id: int = None) -> Model:
-        return self.model_class.objects.get(id=schedule_id)
+    def get(self, function_id: int = None, user=None) -> Model:
+        function_service = self.model_class.objects.get(id=function_id)
+        if user and not validate_team_user(user, function_service.team):
+            raise ObjectNotFound("Function Not Found")
+        return function_service
 
-    def get_query_set(self, params: Dict):
+    def get_query_set(self, params: Dict, user=None):
         name = params.get("name")
         order_by = params.get("order_by", "-id")
         if name:
@@ -55,6 +60,8 @@ class FunctionServiceBusiness(pydantic.BaseModel):
             )
         else:
             object_list = self.model_class.objects.all().order_by(order_by)
+        if user:
+            object_list = object_list.filter(team__in=get_user_team(user))
         return object_list
 
 
@@ -125,16 +132,21 @@ class DomainFunctionServiceBusiness(pydantic.BaseModel):
             object_domain = self.model_class.objects.create(**params)
         return object_domain
 
-    def get(self, domain_id: int) -> Model:
-        return self.model_class.objects.get(id=domain_id)
+    def get(self, domain_id: int, user=None) -> Model:
+        domain = self.model_class.objects.get(id=domain_id)
+        if user and not validate_team_user(user, domain.team):
+            raise ObjectNotFound("Domain Not Found")
+        return domain
 
-    def get_query_set(self, params: Dict):
+    def get_query_set(self, params: Dict, user=None):
         name = params.get("name")
         order_by = params.get("order_by", "-id")
         if name:
             object_list = self.model_class.objects.filter(name__icontains=name)
         else:
             object_list = self.model_class.objects.all().order_by(order_by)
+        if user:
+            object_list = object_list.filter(team__in=get_user_team(user))
         return object_list
 
 
@@ -164,16 +176,21 @@ class CustomerBusiness(pydantic.BaseModel):
             object_customer = self.model_class.objects.create(**params)
         return object_customer
 
-    def get(self, customer_id: int) -> Model:
-        return self.model_class.objects.get(id=customer_id)
+    def get(self, customer_id: int, user: None) -> Model:
+        customer = self.model_class.objects.get(id=customer_id)
+        if user and not validate_team_user(user, customer.team):
+            raise ObjectNotFound("Customer Not Found")
+        return customer
 
-    def get_query_set(self, params: Dict):
+    def get_query_set(self, params: Dict, user=None):
         name = params.get("name")
         order_by = params.get("order_by", "-id")
         if name:
             object_list = self.model_class.objects.filter(name__icontains=name)
         else:
             object_list = self.model_class.objects.all().order_by(order_by)
+        if user:
+            object_list = object_list.filter(team__in=get_user_team(user))
         return object_list
 
 

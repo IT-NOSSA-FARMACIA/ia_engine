@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 
 from .choices import EXECUTION_STATUS_QUEUE
-from .tasks import process_ticket
+from .tasks import process_ticket, execute_schedule
 from .models import (
     Schedule,
     Script,
@@ -18,6 +18,8 @@ from .models import (
     TicketActionLog,
     TicketParameter,
 )
+from core.utils import validate_team_user, get_user_team
+from .exceptions import ObjectNotFound
 
 import pydantic
 
@@ -57,6 +59,11 @@ class ScheduleBusiness(pydantic.BaseModel):
             object_schedule = self.model_class.objects.create(**params)
         return object_schedule
 
+    def execute(self, schedule_id: int):
+        execute_schedule.apply_async(
+            kwargs={"schedule_id": schedule_id}, queue="execute-schedule"
+        )
+
     def update_step_actions(self, schedule: Schedule, actions_id: List):
         StepSchedule.objects.filter(schedule=schedule).delete()
         execution_order = 0
@@ -67,10 +74,13 @@ class ScheduleBusiness(pydantic.BaseModel):
                 )
                 execution_order += 1
 
-    def get(self, schedule_id: int = None) -> Model:
-        return self.model_class.objects.get(id=schedule_id)
+    def get(self, schedule_id: int = None, user=None) -> Model:
+        schedule = self.model_class.objects.get(id=schedule_id)
+        if user and not validate_team_user(user, schedule.team):
+            raise ObjectNotFound("Schedule Not Found")
+        return schedule
 
-    def get_query_set(self, params: Dict):
+    def get_query_set(self, params: Dict, user=None):
         name = params.get("name")
         order_by = params.get("order_by", "id")
         if name:
@@ -79,6 +89,8 @@ class ScheduleBusiness(pydantic.BaseModel):
             )
         else:
             object_list = self.model_class.objects.all().order_by(order_by)
+        if user:
+            object_list = object_list.filter(team__in=get_user_team(user))
         return object_list
 
 
@@ -154,10 +166,13 @@ class ActionBusiness(pydantic.BaseModel):
             object_action = self.model_class.objects.create(**params)
         return object_action
 
-    def get(self, action_id: int = None) -> Model:
-        return self.model_class.objects.get(id=action_id)
+    def get(self, action_id: int = None, user=None) -> Model:
+        action = self.model_class.objects.get(id=action_id)
+        if user and not validate_team_user(user, action.team):
+            raise ObjectNotFound("Schedule Not Found")
+        return action
 
-    def get_query_set(self, params: Dict):
+    def get_query_set(self, params: Dict, user=None):
         name = params.get("name")
         order_by = params.get("order_by", "id")
         if name:
@@ -166,6 +181,8 @@ class ActionBusiness(pydantic.BaseModel):
             )
         else:
             object_list = self.model_class.objects.all().order_by(order_by)
+        if user:
+            object_list = object_list.filter(team__in=get_user_team(user))
         return object_list
 
 
@@ -189,7 +206,7 @@ class ScheduleExecutionBusiness(pydantic.BaseModel):
     def get_tickets(self, execution_id: int):
         return Ticket.objects.filter(schedule_execution__id=execution_id)
 
-    def get_query_set(self, params: Dict):
+    def get_query_set(self, params: Dict, user=None):
         name = params.get("name")
         order_by = params.get("order_by", "-id")
         if name:
@@ -198,7 +215,9 @@ class ScheduleExecutionBusiness(pydantic.BaseModel):
                 | Q(schedule__description__icontains=name)
             )
         else:
-            object_list = self.model_class.objects.all().order_by(order_by)
+            object_list = self.model_class.objects.filter().order_by(order_by)
+        if user:
+            object_list = object_list.filter(schedule__team__in=get_user_team(user))
         return object_list
 
 
@@ -234,14 +253,17 @@ class TicketBusiness(pydantic.BaseModel):
         )
         return ticket
 
-    def get_query_set(self, params: Dict):
+    def get_query_set(self, params: Dict, user=None):
         name = params.get("name")
         order_by = params.get("order_by", "-id")
+        print(user)
         if name:
             object_list = self.model_class.objects.filter(
                 Q(schedule__name__icontains=name)
                 | Q(schedule__description__icontains=name)
             )
         else:
-            object_list = self.model_class.objects.all().order_by(order_by)
+            object_list = self.model_class.objects.filter().order_by(order_by)
+        if user:
+            object_list = object_list.filter(schedule__team__in=get_user_team(user))
         return object_list

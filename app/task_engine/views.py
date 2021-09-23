@@ -38,6 +38,7 @@ from .metrics.area import (
     get_graphics_area_schedule_per_time,
     get_graphics_area_ticket_per_time,
 )
+from core.utils import validate_team_user, get_user_team
 
 
 @method_decorator(permission_required(settings.AUTOMATION_VIEWER), name="get")
@@ -53,7 +54,9 @@ class ScheduleListView(ListView):
         self.business = self.business_class.factory()
 
     def get_queryset(self):
-        return self.business.get_query_set(params=self.request.GET)
+        return self.business.get_query_set(
+            params=self.request.GET, user=self.request.user
+        )
 
 
 class ScheduleView(View):
@@ -65,8 +68,12 @@ class ScheduleView(View):
 
     @method_decorator(permission_required(settings.AUTOMATION_DEVELOPER))
     def post(self, request: HttpRequest, schedule_id: int = 0) -> HttpResponse:
-        actions_id = request.POST.getlist("action")
-        form = ScheduleForm(request.POST)
+        request_data = request.POST.copy()
+        actions_id = request_data.getlist("action")
+        if schedule_id:
+            schedule = self.business.get(schedule_id=schedule_id, user=request.user)
+            request_data.update({"team": schedule.team})
+        form = ScheduleForm(request.user, request_data)
         if form.is_valid():
             object_schedule = self.business.update_or_create(
                 schedule_id=schedule_id, params=form.cleaned_data, user=request.user
@@ -80,8 +87,8 @@ class ScheduleView(View):
     @method_decorator(permission_required(settings.AUTOMATION_VIEWER))
     def get(self, request: HttpRequest, schedule_id: int = None) -> HttpResponse:
         if schedule_id:
-            schedule = self.business.get(schedule_id=schedule_id)
-            form = ScheduleForm(initial=model_to_dict(schedule))
+            schedule = self.business.get(schedule_id=schedule_id, user=request.user)
+            form = ScheduleForm(user=request.user, initial=model_to_dict(schedule))
             step_schedule = StepSchedule.objects.filter(schedule=schedule)
             environment_variable = ScheduleEnvironmentVariable.objects.filter(
                 schedule=schedule
@@ -93,9 +100,10 @@ class ScheduleView(View):
         else:
             schedule = None
             extra = {}
-            form = ScheduleForm()
+            form = ScheduleForm(user=request.user)
             formset = StepFormSet()
-        extra["actions"] = Action.objects.filter()
+        if schedule:
+            extra["actions"] = Action.objects.filter(team=schedule.team)
         return render(
             request,
             "schedule/schedule.html",
@@ -154,7 +162,9 @@ class ActionListView(ListView):
         self.business = self.business_class.factory()
 
     def get_queryset(self):
-        return self.business.get_query_set(params=self.request.GET)
+        return self.business.get_query_set(
+            params=self.request.GET, user=self.request.user
+        )
 
 
 class ActionView(View):
@@ -166,7 +176,11 @@ class ActionView(View):
 
     @method_decorator(permission_required(settings.AUTOMATION_DEVELOPER))
     def post(self, request: HttpRequest, action_id: int = 0) -> HttpResponse:
-        form = ActionForm(request.POST)
+        request_data = request.POST.copy()
+        if action_id:
+            action = self.business.get(action_id=action_id, user=request.user)
+            request_data.update({"team": action.team})
+        form = ActionForm(request.user, request_data)
         if form.is_valid():
             object_action = self.business.update_or_create(
                 action_id=action_id, params=form.cleaned_data, user=request.user
@@ -183,7 +197,7 @@ class ActionView(View):
         else:
             action = None
             extra = {}
-            form = ActionForm()
+            form = ActionForm(user=request.user)
         return render(
             request,
             "actions/action.html",
@@ -212,7 +226,9 @@ class ScheduleExecutionListView(ListView):
         self.business = self.business_class.factory()
 
     def get_queryset(self):
-        return self.business.get_query_set(params=self.request.GET)
+        return self.business.get_query_set(
+            params=self.request.GET, user=self.request.user
+        )
 
 
 class ScheduleExecutionView(View):
@@ -245,7 +261,9 @@ class TicketListView(ListView):
         self.business = self.business_class.factory()
 
     def get_queryset(self):
-        return self.business.get_query_set(params=self.request.GET)
+        return self.business.get_query_set(
+            params=self.request.GET, user=self.request.user
+        )
 
 
 class TicketView(View):
@@ -289,11 +307,30 @@ class ReprocessTicketView(View):
         return redirect(reverse("task_engine:ticket", args=(ticket.id,)))
 
 
+class ForceExecutionScheduleView(View):
+    business_class = ScheduleBusiness
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.business = self.business_class.factory()
+
+    @method_decorator(permission_required(settings.AUTOMATION_DEVELOPER))
+    def post(self, request: HttpRequest, schedule_id: int) -> HttpResponse:
+        self.business.execute(schedule_id)
+        messages.success(
+            request,
+            "Integração enviada para execução com sucesso. Verifique a execução na lista de execuções.",
+        )
+        return redirect(reverse("task_engine:schedule", args=(schedule_id,)))
+
+
 def graphics_bar_per_schedule(request):
     time_to_search = request.GET.get("time", 0)
     if not time_to_search:
         time_to_search = 0
-    graphics_bar_data = get_graphics_bar_per_schedule(int(time_to_search))
+    graphics_bar_data = get_graphics_bar_per_schedule(
+        int(time_to_search), user=request.user
+    )
     return JsonResponse(graphics_bar_data)
 
 
@@ -301,7 +338,9 @@ def graphics_bar_ticket_per_schedule(request):
     time_to_search = request.GET.get("time", 0)
     if not time_to_search:
         time_to_search = 0
-    graphics_bar_data = get_graphics_bar_ticket_per_schedule(int(time_to_search))
+    graphics_bar_data = get_graphics_bar_ticket_per_schedule(
+        int(time_to_search), user=request.user
+    )
     return JsonResponse(graphics_bar_data)
 
 
@@ -309,7 +348,9 @@ def graphics_area_schedule_per_time(request):
     time_to_search = request.GET.get("time", 0)
     if not time_to_search:
         time_to_search = 0
-    graphics_bar_data = get_graphics_area_schedule_per_time(int(time_to_search))
+    graphics_bar_data = get_graphics_area_schedule_per_time(
+        int(time_to_search), user=request.user
+    )
     return JsonResponse(graphics_bar_data)
 
 
@@ -317,5 +358,7 @@ def graphics_area_ticket_per_time(request):
     time_to_search = request.GET.get("time", 0)
     if not time_to_search:
         time_to_search = 0
-    graphics_bar_data = get_graphics_area_ticket_per_time(int(time_to_search))
+    graphics_bar_data = get_graphics_area_ticket_per_time(
+        int(time_to_search), user=request.user
+    )
     return JsonResponse(graphics_bar_data)

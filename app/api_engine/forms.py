@@ -1,14 +1,14 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from django.forms import formset_factory
 
 from core.models import Team
 from .models import (
     FunctionService,
     DomainFunctionService,
     FunctionServiceEnvironmentVariable,
-    Customer
+    Customer,
 )
+from core.utils import get_user_team
 from .choices import HTTP_METHOD_CHOICE
 
 
@@ -56,6 +56,18 @@ class FunctionServiceForm(forms.Form):
     class Meta:
         model = FunctionService
 
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if kwargs:
+            self.fields["team"].widget.attrs["disabled"] = "true"
+        if user:
+            self.fields["team"].queryset = Team.objects.filter(user=user).order_by(
+                "name"
+            )
+            self.fields["domain"].queryset = DomainFunctionService.objects.filter(
+                team__in=get_user_team(user)
+            ).order_by("name")
+
 
 class FunctionServiceEnvironmentVariableForm(forms.Form):
     name = forms.CharField(label="Nome", required=True, widget=forms.TextInput())
@@ -92,6 +104,15 @@ class DomainFunctionServiceForm(forms.Form):
     class Meta:
         model = DomainFunctionService
 
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if kwargs:
+            self.fields["team"].widget.attrs["disabled"] = "true"
+        if user:
+            self.fields["team"].queryset = Team.objects.filter(user=user).order_by(
+                "name"
+            )
+
 
 class CustomerForm(forms.Form):
     name = forms.CharField(label="Nome", required=True, widget=forms.TextInput())
@@ -107,3 +128,12 @@ class CustomerForm(forms.Form):
 
     class Meta:
         model = Customer
+
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if kwargs:
+            self.fields["team"].widget.attrs["disabled"] = "true"
+        if user:
+            self.fields["team"].queryset = Team.objects.filter(user=user).order_by(
+                "name"
+            )

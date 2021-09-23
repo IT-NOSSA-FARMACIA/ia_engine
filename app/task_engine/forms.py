@@ -4,6 +4,7 @@ from django.forms import formset_factory
 
 from core.models import Team
 from .models import Action, Schedule
+from core.utils import validate_team_user
 
 
 class DateTimeInput(forms.DateTimeInput):
@@ -31,10 +32,10 @@ StepFormSet = formset_factory(StepForm, extra=10)
 
 
 class ScheduleForm(forms.Form):
-    name = forms.CharField(label="Nome", required=False, widget=forms.TextInput())
+    name = forms.CharField(label="Nome", required=True, widget=forms.TextInput())
     description = forms.CharField(
         label="Descrição",
-        required=False,
+        required=True,
         widget=forms.Textarea(attrs={"rows": 4}),
     )
     script = forms.CharField(
@@ -44,17 +45,20 @@ class ScheduleForm(forms.Form):
     )
     days = forms.CharField(
         label="Dias",
-        required=False,
+        required=True,
+        initial=0,
         widget=forms.TextInput(),
     )
     hours = forms.CharField(
         label="Horas",
-        required=False,
+        required=True,
+        initial=0,
         widget=forms.TextInput(),
     )
     minutes = forms.CharField(
         label="Minutos",
-        required=False,
+        required=True,
+        initial=0,
         widget=forms.TextInput(),
     )
     cron = forms.CharField(
@@ -78,7 +82,7 @@ class ScheduleForm(forms.Form):
         ),  # .filter(user=self.request.user))
         # label=_("Time"), # aplica translate
         label="Time",
-        required=False,
+        required=True,
         widget=forms.Select(attrs={"class": "form-control"}),
     )
     action = forms.ModelChoiceField(
@@ -100,26 +104,14 @@ class ScheduleForm(forms.Form):
         model = Schedule
         fields = ("script__code",)
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.helper = FormHelper()
-    #     self.helper.layout = Layout(
-    #         Row(
-    #             Column('email', css_class='form-group col-md-6 mb-0'),
-    #             Column('password', css_class='form-group col-md-6 mb-0'),
-    #             css_class='form-row'
-    #         ),
-    #         'address_1',
-    #         'address_2',
-    #         Row(
-    #             Column('city', css_class='form-group col-md-6 mb-0'),
-    #             Column('state', css_class='form-group col-md-4 mb-0'),
-    #             Column('zip_code', css_class='form-group col-md-2 mb-0'),
-    #             css_class='form-row'
-    #         ),
-    #         'check_me_out',
-    #         Submit('submit', 'Salvar')
-    #     )
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if kwargs:
+            self.fields["team"].widget.attrs["disabled"] = "true"
+        if user:
+            self.fields["team"].queryset = Team.objects.filter(user=user).order_by(
+                "name"
+            )
 
 
 class ScheduleEnvironmentVariableForm(forms.Form):
@@ -161,3 +153,12 @@ class ActionForm(forms.Form):
     class Meta:
         model = Schedule
         fields = ("script__code",)
+
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if kwargs:
+            self.fields["team"].widget.attrs["disabled"] = "true"
+        if user:
+            self.fields["team"].queryset = Team.objects.filter(user=user).order_by(
+                "name"
+            )

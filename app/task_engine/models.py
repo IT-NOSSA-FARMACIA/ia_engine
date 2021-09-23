@@ -180,7 +180,7 @@ class Ticket(models.Model):
     schedule_execution = models.ForeignKey(
         ScheduleExecution, on_delete=models.CASCADE, blank=True, null=True
     )
-    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    created_date_ticket = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     execution_status = models.CharField(
         max_length=2, choices=EXECUTION_STATUS_CHOICE, default=EXECUTION_STATUS_PENDING
     )

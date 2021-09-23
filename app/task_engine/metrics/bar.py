@@ -7,14 +7,16 @@ from task_engine.choices import (
 from datetime import datetime, timedelta
 from typing import Any, Dict
 from django.db.models import Count
+from core.utils import get_user_team
 
 
-def get_graphics_bar_per_schedule(time_to_search: int) -> Dict[str, Any]:
+def get_graphics_bar_per_schedule(time_to_search: int, user) -> Dict[str, Any]:
     schedule_error = (
         ScheduleExecution.objects.values("schedule__name")
         .filter(
             execution_status=EXECUTION_STATUS_ERROR,
             execution_date__gt=datetime.now().date() - timedelta(time_to_search),
+            schedule__team__in=get_user_team(user),
         )
         .annotate(total=Count("schedule__name"))
     )
@@ -27,6 +29,7 @@ def get_graphics_bar_per_schedule(time_to_search: int) -> Dict[str, Any]:
         .filter(
             execution_status=EXECUTION_STATUS_SUCCESS,
             execution_date__gt=datetime.now().date() - timedelta(time_to_search),
+            schedule__team__in=get_user_team(user),
         )
         .annotate(total=Count("schedule__name"))
     )
@@ -34,7 +37,7 @@ def get_graphics_bar_per_schedule(time_to_search: int) -> Dict[str, Any]:
     for schedule in schedule_success:
         new_schedule_success[schedule.get("schedule__name")] = schedule.get("total")
 
-    all_schedule = Schedule.objects.all()
+    all_schedule = Schedule.objects.filter(team__in=get_user_team(user))
 
     categories = []
     total_success = []
@@ -58,12 +61,13 @@ def get_graphics_bar_per_schedule(time_to_search: int) -> Dict[str, Any]:
     }
 
 
-def get_graphics_bar_ticket_per_schedule(time_to_search: int) -> Dict[str, Any]:
+def get_graphics_bar_ticket_per_schedule(time_to_search: int, user) -> Dict[str, Any]:
     ticket_error = (
         Ticket.objects.values("schedule__name")
         .filter(
             execution_status=EXECUTION_STATUS_ERROR,
-            created_date__gt=datetime.now().date() - timedelta(time_to_search),
+            created_date_ticket__gt=datetime.now().date() - timedelta(time_to_search),
+            schedule__team__in=get_user_team(user),
         )
         .annotate(total=Count("schedule__name"))
     )
@@ -75,7 +79,8 @@ def get_graphics_bar_ticket_per_schedule(time_to_search: int) -> Dict[str, Any]:
         Ticket.objects.values("schedule__name")
         .filter(
             execution_status=EXECUTION_STATUS_SUCCESS,
-            created_date__gt=datetime.now().date() - timedelta(time_to_search),
+            created_date_ticket__gt=datetime.now().date() - timedelta(time_to_search),
+            schedule__team__in=get_user_team(user),
         )
         .annotate(total=Count("schedule__name"))
     )
@@ -83,7 +88,7 @@ def get_graphics_bar_ticket_per_schedule(time_to_search: int) -> Dict[str, Any]:
     for ticket in ticket_success:
         new_ticket_success[ticket.get("schedule__name")] = ticket.get("total")
 
-    all_schedule = Schedule.objects.all()
+    all_schedule = Schedule.objects.filter(team__in=get_user_team(user))
 
     categories = []
     total_success = []

@@ -14,7 +14,7 @@ PASSWORD_REGEX_RULES = r"(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
 
 def index(request):
     time_to_search = int(request.GET.get("time", 0))
-    dashboard_data = resume_executions(time_to_search)
+    dashboard_data = resume_executions(time_to_search, request.user)
     return render(request, "index.html", dashboard_data)
 
 

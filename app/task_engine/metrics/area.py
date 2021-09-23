@@ -7,11 +7,12 @@ from task_engine.choices import (
 from datetime import datetime, timedelta
 from typing import Any, Dict
 from django.db.models import Count
+from core.utils import get_user_team
 
 import datetime as datetime_root
 
 
-def get_graphics_area_schedule_per_time(time_to_search: int) -> Dict[str, Any]:
+def get_graphics_area_schedule_per_time(time_to_search: int, user) -> Dict[str, Any]:
     convert_sql_date = (
         "CONVERT(VARCHAR(10), execution_date)"
         if time_to_search > 0
@@ -26,6 +27,7 @@ def get_graphics_area_schedule_per_time(time_to_search: int) -> Dict[str, Any]:
         .filter(
             execution_status=EXECUTION_STATUS_SUCCESS,
             execution_date__gt=datetime.now().date() - timedelta(time_to_search),
+            schedule__team__in=get_user_team(user),
         )
     )
 
@@ -37,6 +39,7 @@ def get_graphics_area_schedule_per_time(time_to_search: int) -> Dict[str, Any]:
         .filter(
             execution_status=EXECUTION_STATUS_ERROR,
             execution_date__gt=datetime.now().date() - timedelta(time_to_search),
+            schedule__team__in=get_user_team(user),
         )
     )
 
@@ -81,21 +84,22 @@ def get_graphics_area_schedule_per_time(time_to_search: int) -> Dict[str, Any]:
     }
 
 
-def get_graphics_area_ticket_per_time(time_to_search: int) -> Dict[str, Any]:
+def get_graphics_area_ticket_per_time(time_to_search: int, user) -> Dict[str, Any]:
     convert_sql_date = (
-        "CONVERT(VARCHAR(10), created_date)"
+        "CONVERT(VARCHAR(10), created_date_ticket)"
         if time_to_search > 0
-        else "CONVERT(VARCHAR(13), created_date)"
+        else "CONVERT(VARCHAR(13), created_date_ticket)"
     )
 
     tickets_success = (
         Ticket.objects.extra(select={"day": convert_sql_date})
         .values("day")
         .order_by("day")
-        .annotate(total=Count("created_date"))
+        .annotate(total=Count("created_date_ticket"))
         .filter(
             execution_status=EXECUTION_STATUS_SUCCESS,
-            created_date__gt=datetime.now().date() - timedelta(time_to_search),
+            created_date_ticket__gt=datetime.now().date() - timedelta(time_to_search),
+            schedule__team__in=get_user_team(user)
         )
     )
 
@@ -103,10 +107,11 @@ def get_graphics_area_ticket_per_time(time_to_search: int) -> Dict[str, Any]:
         Ticket.objects.extra(select={"day": convert_sql_date})
         .values("day")
         .order_by("day")
-        .annotate(total=Count("created_date"))
+        .annotate(total=Count("created_date_ticket"))
         .filter(
             execution_status=EXECUTION_STATUS_ERROR,
-            created_date__gt=datetime.now().date() - timedelta(time_to_search),
+            created_date_ticket__gt=datetime.now().date() - timedelta(time_to_search),
+            schedule__team__in=get_user_team(user)
         )
     )
 

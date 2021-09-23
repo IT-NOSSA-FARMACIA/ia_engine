@@ -1,0 +1,3 @@
+class ObjectNotFound(Exception):
+    pass
+

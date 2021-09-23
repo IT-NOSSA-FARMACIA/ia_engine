@@ -11,6 +11,7 @@ from .views import (
     TicketView,
     TicketListView,
     ReprocessTicketView,
+    ForceExecutionScheduleView,
     graphics_bar_per_schedule,
     graphics_bar_ticket_per_schedule,
     graphics_area_schedule_per_time,
@@ -20,9 +21,17 @@ from .views import (
 app_name = "task_engine"
 
 urlpatterns = [
-    path("schedule/list/", login_required(ScheduleListView.as_view()), name="schedule-list"),
+    path(
+        "schedule/list/",
+        login_required(ScheduleListView.as_view()),
+        name="schedule-list",
+    ),
     path("schedule/", login_required(ScheduleView.as_view()), name="schedule"),
-    path("schedule/<int:schedule_id>", login_required(ScheduleView.as_view()), name="schedule"),
+    path(
+        "schedule/<int:schedule_id>",
+        login_required(ScheduleView.as_view()),
+        name="schedule",
+    ),
     path(
         "environment-variables/<int:schedule_id>",
         login_required(EnvironmentVariableView.as_view()),
@@ -42,11 +51,36 @@ urlpatterns = [
         login_required(ScheduleExecutionView.as_view()),
         name="schedule-execution",
     ),
-    path("schedule/graphics_bar/", login_required(graphics_bar_per_schedule), name="graphics_bar_per_schedule"),
-    path("schedule/graphics_area/", login_required(graphics_area_schedule_per_time), name="graphics_area_schedule_per_time"),
+    path(
+        "schedule/graphics_bar/",
+        login_required(graphics_bar_per_schedule),
+        name="graphics_bar_per_schedule",
+    ),
+    path(
+        "schedule/graphics_area/",
+        login_required(graphics_area_schedule_per_time),
+        name="graphics_area_schedule_per_time",
+    ),
+    path(
+        "schedule/force_execution/<int:schedule_id>",
+        login_required(ForceExecutionScheduleView.as_view()),
+        name="schedule-force-execution",
+    ),
     path("ticket/list/", login_required(TicketListView.as_view()), name="ticket-list"),
     path("ticket/<int:ticket_id>", login_required(TicketView.as_view()), name="ticket"),
-    path("ticket/reprocess/<int:ticket_id>", login_required(ReprocessTicketView.as_view()), name="reprocess_ticket"),
-    path("ticket/graphics_bar/", login_required(graphics_bar_ticket_per_schedule), name="graphics_bar_ticket_per_schedule"),
-    path("ticket/graphics_area/", login_required(graphics_area_ticket_per_time), name="graphics_area_ticket_per_time"),
+    path(
+        "ticket/reprocess/<int:ticket_id>",
+        login_required(ReprocessTicketView.as_view()),
+        name="reprocess_ticket",
+    ),
+    path(
+        "ticket/graphics_bar/",
+        login_required(graphics_bar_ticket_per_schedule),
+        name="graphics_bar_ticket_per_schedule",
+    ),
+    path(
+        "ticket/graphics_area/",
+        login_required(graphics_area_ticket_per_time),
+        name="graphics_area_ticket_per_time",
+    ),
 ]

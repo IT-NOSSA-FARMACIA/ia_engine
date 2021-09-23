@@ -114,7 +114,7 @@
 
                             <div id="vue-app">
                                 <div class="row">               
-                                    <div id="div_id_action" class="form-group">    
+                                    <div id="div_id_action" class="form-group">                                            
                                         {% for step in extra.step_schedule %}
                                             <div class="row">
                                                 <div class="form-group col-6">   
@@ -133,40 +133,43 @@
                                                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#actionModal"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>    
                                                     <button type="button" class="btn btn-danger"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>  
                                                 </div>    {% endcomment %}
-                                            </div>
-                                            
+                                            </div>                                            
                                         {% endfor %}
                                     </div>       
-                                        
-                                    <div id="div_id_action" v-for="item in items" :key="item.message" class="form-group">
-                                        <div class="row">
-                                            <div class="form-group col-6">   
-                                                <label for="id_action" class="form-label">
-                                                Step Action
-                                                </label>
-                                                <select name="action" id="id_action" class="form-control select form-select">
-                                                    <option value="">---------</option>
-                                                    {% for action in extra.actions %}                                
-                                                        <option value="{{action.id}}" {% if action == step.action %}selected="selected"{% endif %}>{{action.name}}</option>
-                                                    {% endfor %}
-                                                </select>
+                                    {% if extra.actions %}
+                                        <div id="div_id_action" v-for="item in items" :key="item.message" class="form-group">
+                                            <div class="row">
+                                                <div class="form-group col-6">   
+                                                    <label for="id_action" class="form-label">
+                                                    Step Action
+                                                    </label>
+                                                    <select name="action" id="id_action" class="form-control select form-select">
+                                                        <option value="">---------</option>
+                                                        {% for action in extra.actions %}                                
+                                                            <option value="{{action.id}}" {% if action == step.action %}selected="selected"{% endif %}>{{action.name}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                {% comment %} <div class="form-group col-4 mt-4">                                
+                                                    <button type="button" class="btn btn-warning"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>                            
+                                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#actionModal"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>        
+                                                    <button type="button" class="btn btn-danger"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>                                                   
+                                                </div> {% endcomment %}
                                             </div>
-                                            {% comment %} <div class="form-group col-4 mt-4">                                
-                                                <button type="button" class="btn btn-warning"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>                            
-                                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#actionModal"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>        
-                                                <button type="button" class="btn btn-danger"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>                                                   
-                                            </div> {% endcomment %}
                                         </div>
-                                    </div>
-                                </div>      
-                                <button type="button" class="btn btn-success mb-4" v-on:click="addNewTodo"><i data-feather="plus" width="20" style="color: white"></i></button>
+                                        </div>      
+                                        <button type="button" class="btn btn-success mb-4" v-on:click="addNewTodo"><i data-feather="plus" width="20" style="color: white"></i></button>                                        
+                                    {% endif %}
+
                             </div>
                             {{ form.active|as_crispy_field }}
                             {% if perms.task_engine.change_automation %}
                             <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
+                            {% if schedule %}
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-force-execute">{% trans 'Forçar Execução' %}</button>
                             {% endif %}
-                        </form>
-                    
+                            {% endif %}
+                        </form>                    
                     </div>
                 </div>
 
@@ -178,6 +181,27 @@
             </div>
         </div>
     </div>
+    <!--Modal Force Execute -->
+    <div class="modal" tabindex="-1" id="modal-force-execute">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Execução de integração</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja executar esta integração?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Não</button>
+                <form action={% if schedule %}{% url 'task_engine:schedule-force-execution' schedule.id %}{% endif %} method="POST">{% csrf_token %}
+                    <button type="submit" class="btn btn-success">Sim</button>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>    
+
 </section>
 
 <script>
