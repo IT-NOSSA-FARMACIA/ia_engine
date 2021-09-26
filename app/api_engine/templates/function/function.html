@@ -95,7 +95,11 @@
                                     id="id_full_url"
                                     disabled
                                 />
+                                {% if extra.function %}
+                                <a href="{{ extra.function.swagger_doc_url }}" target="_blank">OpenAPI Doc</a>
+                                {% endif %}
                             </div>
+                            
                             {{ form.http_method|as_crispy_field }}
                             {{ form.description|as_crispy_field }}
                             {{ form.code|as_crispy_field }}    
