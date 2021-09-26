@@ -34,6 +34,8 @@ ALLOWED_HOSTS = env.list("API_ENGINE_ALLOWED_HOSTS", default=["*"])
 #CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 
+SWAGGER_URL_TO_DOC = env.str("SWAGGER_URL_TO_DOC", default="http://localhost/swagger/")
+
 
 # Application definition
 INSTALLED_APPS = [
