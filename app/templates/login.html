@@ -25,8 +25,8 @@
                     <div class="card pt-4">
                         <div class="card-body">
                             <div class="text-center mb-5">
-                                <img src="{% static '/images/main_logo.png' %}" class='mb-4'>
-                                <h2 align="center">IA Engine</h2>                                
+                                <img src="{% static '/images/main_logo.svg' %}" class='mb-4'>
+                                <h1 align="center">IA Engine</h1>                                
                             </div>
                             <form action="{% url 'login' %}" method="POST">{% csrf_token %}
                                 <div class="form-group position-relative has-icon-left">
@@ -41,9 +41,9 @@
                                 <div class="form-group position-relative has-icon-left">
                                     <div class="clearfix">
                                         <label for="password">Senha</label>
-                                        <a href="auth-forgot-password.html" class='float-end' style="color: green">
+                                        {% comment %} <a href="auth-forgot-password.html" class='float-end' style="color: green">
                                             <small>Esqueceu a senha?</small>
-                                        </a>
+                                        </a> {% endcomment %}
                                     </div>
                                     <div class="position-relative">
                                         <input type="password" class="form-control" id="password" name="password">
