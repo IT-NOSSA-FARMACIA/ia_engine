@@ -5,6 +5,7 @@ from django.db import models
 from django.core import signing
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.conf import settings
 
 from core.models import Team
 from .choices import HTTP_METHOD_CHOICE, HTTP_METHOD_GET
@@ -143,6 +144,10 @@ class FunctionService(models.Model):
         open_api.openapi = "3.0.0"
         openapi_json = open_api.json(by_alias=True, exclude_none=True, indent=4)
         return openapi_json
+    
+    @property
+    def swagger_doc_url(self):
+        return f"{settings.SWAGGER_URL_TO_DOC}?url={self.full_url}/doc/"
 
     def execute(self, request, *args, **kwargs) -> Any:
         exec(self.code, globals())
