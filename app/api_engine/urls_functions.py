@@ -1,4 +1,4 @@
-from django.urls import path, re_path
+from django.urls import path
 from .views import execute_function, get_openapi_function
 
 app_name = "api_engine_functions"
