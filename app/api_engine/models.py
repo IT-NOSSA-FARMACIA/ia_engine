@@ -79,7 +79,7 @@ class FunctionService(models.Model):
 
     @property
     def full_url(self):
-        return f"/api/{self.domain.url_name}/{self.url_name}"
+        return f"/api/{self.domain.url_name}/{self.url_name}/"
 
     def get_html_hyperlink(self) -> str:
         function_link = reverse("api_engine:function", args=(self.id,))
@@ -147,7 +147,7 @@ class FunctionService(models.Model):
     
     @property
     def swagger_doc_url(self):
-        return f"{settings.SWAGGER_URL_TO_DOC}?url={self.full_url}/doc/"
+        return f"{settings.SWAGGER_URL_TO_DOC}?url={self.full_url}" + "doc/"
 
     def execute(self, request, *args, **kwargs) -> Any:
         exec(self.code, globals())
