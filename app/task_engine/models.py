@@ -200,10 +200,13 @@ class Ticket(models.Model):
 class TicketParameter(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    value = models.CharField(max_length=500)
+    value = models.TextField()
 
     def __str__(self) -> str:
-        return f"{self.ticket.id} - {self.name}"
+        value = self.value[0:50]
+        if len(self.value) > 50:
+            value += "..."
+        return f"{self.ticket.id} - {self.name} - {value}"
 
     class Meta:
         db_table = "ticket_parameter"
