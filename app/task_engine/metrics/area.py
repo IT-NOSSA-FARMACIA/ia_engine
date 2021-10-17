@@ -68,7 +68,7 @@ def get_graphics_area_schedule_per_time(time_to_search: int, user) -> Dict[str, 
     series_error_data = []
     for category in categories:
         for schedule in schedule_execution_error:
-            if schedule["day"] in category:
+            if schedule["day"].replace(" ", "T") in category:
                 series_error_data.append(schedule["total"])
                 break
         else:
@@ -140,7 +140,7 @@ def get_graphics_area_ticket_per_time(time_to_search: int, user) -> Dict[str, An
     series_error_data = []
     for category in categories:
         for schedule in tickets_error:
-            if schedule["day"] in category:
+            if schedule["day"].replace(" ", "T") in category:
                 series_error_data.append(schedule["total"])
                 break
         else:
