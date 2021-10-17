@@ -93,9 +93,13 @@ class ScheduleView(View):
             environment_variable = ScheduleEnvironmentVariable.objects.filter(
                 schedule=schedule
             )
+            executions = ScheduleExecution.objects.filter(schedule=schedule).order_by(
+                "-execution_date"
+            )[0:10]
             extra = {"script": schedule.script}
             extra["step_schedule"] = step_schedule
             extra["environment_variable"] = environment_variable
+            extra["executions"] = executions
             formset = {}
         else:
             schedule = None
