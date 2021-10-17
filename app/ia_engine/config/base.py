@@ -138,8 +138,6 @@ LOGIN_URL = '/login/'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 24 * 60 * 60
 
-TIME_ZONE = env.str("HOT_TIME_ZONE", default="America/Sao_Paulo")
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
