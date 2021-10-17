@@ -17,7 +17,7 @@ services:
       - "8000:8000"
       - "8001:8001"
     environment:
-      - IA_ENGINE_SERVICE=${IA_ENGINE_SERVICE:-development} #development production
+      - IA_ENGINE_SERVICE=${IA_ENGINE_SERVICE:-production} #development production
     env_file:
       - ia-engine.env
 
