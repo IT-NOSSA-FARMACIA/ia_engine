@@ -130,7 +130,7 @@ def process_ticket(ticket_id):
             if isinstance(data, dict):
                 for key, value in data.items():
                     parameters[key] = value
-                    TicketParameter.objects.update_or_create(ticket=ticket, name=key, default={"value": value})
+                    TicketParameter.objects.update_or_create(ticket=ticket, name=key, defaults={"value": value})
         else:
             if step.stoppable:
                 ticket.execution_status = EXECUTION_STATUS_ERROR
