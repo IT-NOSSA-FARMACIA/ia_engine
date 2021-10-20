@@ -105,7 +105,7 @@ def execute_schedule(schedule_id):
 @task
 def process_ticket(ticket_id):
     ticket = Ticket.objects.get(id=ticket_id)
-    ticket.status = EXECUTION_STATUS_PROCESSING
+    ticket.execution_status = EXECUTION_STATUS_PROCESSING
     ticket.save()
     environment_variables = ScheduleEnvironmentVariable.objects.filter(
         schedule=ticket.schedule
