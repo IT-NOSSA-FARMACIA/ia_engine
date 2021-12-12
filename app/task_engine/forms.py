@@ -4,7 +4,7 @@ from django.forms import formset_factory
 
 from core.models import Team
 from .models import Action, Schedule
-from core.utils import validate_team_user
+from .choices import NOTIFICATION_TYPE_CHOICE
 
 
 class DateTimeInput(forms.DateTimeInput):
@@ -98,6 +98,23 @@ class ScheduleForm(forms.Form):
         label="&nbsp Ativo",
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "form-control"}),
+    )
+    notification_type = forms.ChoiceField(
+        label="Notificar",
+        required=True,
+        choices=NOTIFICATION_TYPE_CHOICE,
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    emails_to_notification = forms.CharField(
+        label="Lista de E-mail para Notificação (separados por vírgula)",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "data-separator": ",",
+                "class": "form-control tagin",
+                "data-placeholder": "Adicione o e-mail, depois pressione virgula",
+            }
+        ),
     )
 
     class Meta:

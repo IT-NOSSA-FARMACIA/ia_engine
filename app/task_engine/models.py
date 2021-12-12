@@ -10,7 +10,12 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from core.models import Team
-from .choices import EXECUTION_STATUS_CHOICE, EXECUTION_STATUS_PENDING
+from .choices import (
+    EXECUTION_STATUS_CHOICE,
+    EXECUTION_STATUS_PENDING,
+    NOTIFICATION_TYPE_CHOICE,
+    NOTIFICATION_TYPE_NEVER,
+)
 
 import sys
 import traceback
@@ -73,6 +78,10 @@ class Schedule(models.Model):
     )
     script = models.ForeignKey(Script, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
+    notification_type = models.CharField(
+        max_length=2, choices=NOTIFICATION_TYPE_CHOICE, default=NOTIFICATION_TYPE_NEVER
+    )
+    emails_to_notification = models.CharField(max_length=2000, null=True, blank=True)
     history = HistoricalRecords()
 
     def __str__(self) -> str:

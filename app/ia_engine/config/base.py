@@ -36,6 +36,8 @@ CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 
 SWAGGER_URL_TO_DOC = env.str("SWAGGER_URL_TO_DOC", default="http://localhost/swagger/")
 
+IA_ENGINE_HOST = env.str("IA_ENGINE_HOST", default="http://localhost/")
+
 
 # Application definition
 INSTALLED_APPS = [
