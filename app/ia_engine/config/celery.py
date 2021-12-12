@@ -23,6 +23,7 @@ CELERY_TASK_ROUTES = {
     # "task_engine.tasks.search_pending_tickets": {"queue": "search-pending-tickets"},
     "task_engine.tasks.execute_schedule": {"queue": "execute-schedule"},
     "task_engine.tasks.process_ticket": {"queue": "process-ticket"},
+    "task_engine.tasks.notify_execution": {"queue": "notify-execution"},
 }
 
 BROKER_URL = env.str("CELERY_BROKER_URL", default="amqp://guest:guest@rabbitmq:5672/")

@@ -7,4 +7,5 @@ include(
     "config/logs.py",
     "config/celery.py",
     "config/roles.py",
+    "config/notification.py",
 )
