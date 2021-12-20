@@ -150,12 +150,14 @@ class FunctionService(models.Model):
         return f"{settings.SWAGGER_URL_TO_DOC}?url={self.full_url}" + "doc/"
 
     def execute(self, request, *args, **kwargs) -> Any:
+        status_code = 200
         exec(self.code, globals())
         try:
             return_data = main(request, *args, **kwargs)
         except Exception as ex:
-            return {"error": str(ex)}
-        return return_data
+            status_code = 400
+            return_data = {"error": str(ex)}
+        return status_code, return_data
 
     class Meta:
         db_table = "function_service"

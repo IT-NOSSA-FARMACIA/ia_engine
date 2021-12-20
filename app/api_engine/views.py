@@ -57,8 +57,8 @@ def execute_function(request, domain, function_url):
             parameters["ENV"][
                 environment_variable.name
             ] = environment_variable.load_value
-        response_data = function_service.execute(request, **parameters)
-        return JsonResponse(response_data)
+        status_code, response_data = function_service.execute(request, **parameters)
+        return JsonResponse(response_data, status=status_code)
     else:
         return JsonResponse({"error": "invalid token"}, status=403)
 
