@@ -10,6 +10,8 @@ from django.conf import settings
 from core.models import Team
 from .choices import HTTP_METHOD_CHOICE, HTTP_METHOD_GET
 
+import json
+
 
 class DomainFunctionService(models.Model):
     name = models.CharField(max_length=500)
@@ -93,10 +95,10 @@ class FunctionService(models.Model):
         )
 
         exec(self.code, globals())
-        content_request = {}
+        content_request_body = {}
         content_response = {}
         try:
-            content_request["application/json"] = {
+            content_request_body["application/json"] = {
                 "schema": PydanticSchema(schema_class=Request)
             }
         except NameError:
@@ -109,6 +111,34 @@ class FunctionService(models.Model):
         except NameError:
             pass
 
+        request_parameters = [
+            {
+                "in": "header",
+                "name": "Api-Key",
+                "schema": {"type": "string", "format": "uuid"},
+                "required": True,
+            }
+        ]
+
+        if self.get_http_method_display() == "GET":
+            content_request_body = {}
+            try:
+                schema_request = json.loads(Request.schema_json())
+                properties = schema_request["properties"]
+                properties_required = schema_request["required"]
+                for key, value in properties.items():
+                    print(key, value)
+                    request_parameters.append(
+                        {
+                            "in": "query",
+                            "name": key,
+                            "schema": {"type": value["type"]},
+                            "required": True if key in properties_required else False,
+                        }
+                    )
+            except NameError:
+                pass
+
         open_api_obj = OpenAPI.parse_obj(
             {
                 "info": {
@@ -119,18 +149,8 @@ class FunctionService(models.Model):
                 "paths": {
                     f"{self.full_url}": {
                         f"{self.get_http_method_display().lower()}": {
-                            "parameters": [
-                                {
-                                    "in": "header",
-                                    "name": "Api-Key",
-                                    "schema": {
-                                        "type": "string",
-                                        "format": "uuid"
-                                    },
-                                    "required": True
-                                }
-                            ],
-                            "requestBody": {"content": content_request},
+                            "parameters": request_parameters,
+                            "requestBody": {"content": content_request_body},
                             "responses": {
                                 "200": {
                                     "description": "",
