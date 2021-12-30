@@ -1,7 +1,4 @@
-from openapi_schema_pydantic import OpenAPI
-from openapi_schema_pydantic.util import PydanticSchema, construct_open_api_with_schema_class
-
-import secrets
+import uuid
 
 def generate_token():
-    return secrets.token_hex(32)
+    return uuid.uuid4()

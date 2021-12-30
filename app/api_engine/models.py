@@ -119,6 +119,17 @@ class FunctionService(models.Model):
                 "paths": {
                     f"{self.full_url}": {
                         f"{self.get_http_method_display().lower()}": {
+                            "parameters": [
+                                {
+                                    "in": "header",
+                                    "name": "Api-Key",
+                                    "schema": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "required": True
+                                }
+                            ],
                             "requestBody": {"content": content_request},
                             "responses": {
                                 "200": {
@@ -128,15 +139,6 @@ class FunctionService(models.Model):
                             },
                         }
                     },
-                },
-                "components": {
-                    "securitySchemes": {
-                        "Api-Key": {
-                            "type": "http",
-                            "scheme": "bearer",
-                            "bearerFormat": "JWT",
-                        }
-                    }
                 },
             }
         )
