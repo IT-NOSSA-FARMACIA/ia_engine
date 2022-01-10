@@ -52,6 +52,11 @@ class FunctionServiceForm(forms.Form):
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "form-control"}),
     )
+    public = forms.BooleanField(
+        label="&nbsp API Pública",
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "form-control"}),
+    )
 
     class Meta:
         model = FunctionService
