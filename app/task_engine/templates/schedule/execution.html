@@ -103,8 +103,11 @@
                     </div>
                 </div>
 
-                
-                <div class="tab-pane fade" id="tickets" role="tabpanel" aria-labelledby="tickets-tab">
+                <div class="container-fluid mt-4 ms-2">
+                        <h4>Total: {{ tickets|length }}</h4>
+                </div>
+
+                <div class="tab-pane fade" id="tickets" role="tabpanel" aria-labelledby="tickets-tab">                    
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table">
@@ -115,7 +118,7 @@
                                     </tr>
                                 </thead>
                             <tbody>
-                                {% for ticket in tickets%}
+                                {% for ticket in tickets %}
                                 <tr>
                                     <td><a href="#">{{ ticket.get_html_hyperlink|safe }}</a></td>
                                     <td>
