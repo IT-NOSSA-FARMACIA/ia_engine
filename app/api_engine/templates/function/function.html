@@ -103,8 +103,11 @@
                             {{ form.http_method|as_crispy_field }}
                             {{ form.description|as_crispy_field }}
                             {{ form.code|as_crispy_field }}    
-                            {{ form.team|as_crispy_field }}
-                            {{ form.active|as_crispy_field }}
+                            {{ form.team|as_crispy_field }}                            
+                            {{ form.public|as_crispy_field }}
+                            {{ form.active|as_crispy_field }}                            
+     
+                            
                             {% if perms.api_engine.change_api %}
                             <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
                             {% endif %}
