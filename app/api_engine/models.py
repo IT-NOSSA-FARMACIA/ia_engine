@@ -1,5 +1,5 @@
-from typing import Any
-from simple_history.models import HistoricalRecords
+from core.models import Team
+from contextlib import redirect_stdout
 
 from django.db import models
 from django.core import signing
@@ -7,10 +7,15 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.conf import settings
 
-from core.models import Team
+from io import StringIO
+from simple_history.models import HistoricalRecords
+from typing import Any
+
 from .choices import HTTP_METHOD_CHOICE, HTTP_METHOD_GET
 
 import json
+import traceback
+import sys
 
 
 class DomainFunctionService(models.Model):
@@ -74,6 +79,7 @@ class FunctionService(models.Model):
     )
     code = models.TextField()
     active = models.BooleanField(default=True)
+    public = models.BooleanField(default=False)
     history = HistoricalRecords()
 
     def __str__(self) -> str:
@@ -111,14 +117,17 @@ class FunctionService(models.Model):
         except NameError:
             pass
 
-        request_parameters = [
-            {
-                "in": "header",
-                "name": "Api-Key",
-                "schema": {"type": "string", "format": "uuid"},
-                "required": True,
-            }
-        ]
+        if self.public:
+            request_parameters = []
+        else:
+            request_parameters = [
+                {
+                    "in": "header",
+                    "name": "Api-Key",
+                    "schema": {"type": "string", "format": "uuid"},
+                    "required": True,
+                }
+            ]
 
         if self.get_http_method_display() == "GET":
             content_request_body = {}
@@ -127,7 +136,6 @@ class FunctionService(models.Model):
                 properties = schema_request["properties"]
                 properties_required = schema_request["required"]
                 for key, value in properties.items():
-                    print(key, value)
                     request_parameters.append(
                         {
                             "in": "query",
@@ -166,19 +174,34 @@ class FunctionService(models.Model):
         open_api.openapi = "3.0.0"
         openapi_json = open_api.json(by_alias=True, exclude_none=True, indent=4)
         return openapi_json
-    
+
     @property
     def swagger_doc_url(self):
         return f"{settings.SWAGGER_URL_TO_DOC}?url={self.full_url}" + "doc/"
 
-    def execute(self, request, *args, **kwargs) -> Any:
+    def execute(self, request, customer=None, *args, **kwargs) -> Any:
+        stdout = StringIO()
+        stderr = StringIO()
         status_code = 200
-        exec(self.code, globals())
-        try:
-            return_data = main(request, *args, **kwargs)
-        except Exception as ex:
-            status_code = 400
-            return_data = {"error": str(ex)}
+        with redirect_stdout(stdout):
+            exec(self.code, globals())
+            try:
+                return_data = main(request, *args, **kwargs)
+            except Exception as ex:
+                status_code = 400
+                return_data = {"error": str(ex)}
+                with redirect_stdout(stderr):
+                    traceback.print_exc(file=sys.stdout)
+
+        script_log = stdout.getvalue() + stderr.getvalue()
+        FunctionServiceExecution.objects.create(
+            function_service=self,
+            output=script_log,
+            response=return_data,
+            request=request.body or request.GET or request.POST,
+            customer=customer,
+            status_code=status_code,
+        )
         return status_code, return_data
 
     class Meta:
@@ -270,3 +293,21 @@ class FunctionServiceEnvironmentVariable(models.Model):
 
     class Meta:
         db_table = "function_service_environment_variable"
+
+
+class FunctionServiceExecution(models.Model):
+    function_service = models.ForeignKey(FunctionService, on_delete=models.CASCADE)
+    created_dt = models.DateTimeField(auto_now_add=True)
+    output = models.TextField(blank=True, null=True)
+    response = models.TextField(blank=True, null=True)
+    request = models.TextField(blank=True, null=True)
+    customer = models.ForeignKey(
+        Customer, blank=True, null=True, on_delete=models.DO_NOTHING
+    )
+    status_code = models.IntegerField(blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.function_service.name
+
+    class Meta:
+        db_table = "function_service_execution"
