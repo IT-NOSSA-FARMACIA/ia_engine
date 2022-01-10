@@ -7,6 +7,7 @@ from .models import (
     CustomerFunctionToken,
     Customer,
     FunctionServiceEnvironmentVariable,
+    FunctionServiceExecution
 )
 
 
@@ -15,3 +16,4 @@ admin.site.register(DomainFunctionService)
 admin.site.register(CustomerFunctionToken)
 admin.site.register(Customer)
 admin.site.register(FunctionServiceEnvironmentVariable)
+admin.site.register(FunctionServiceExecution)
