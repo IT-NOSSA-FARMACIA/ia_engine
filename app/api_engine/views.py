@@ -45,10 +45,19 @@ def execute_function(request, domain, function_url):
     if function_service.http_method not in request.method:
         return HttpResponseNotFound()
 
-    token_function = CustomerFunctionToken.objects.filter(
-        token_id=request.headers.get("Api-Key"), function_service=function_service
-    ).exists()
-    if token_function:
+    execute_function = False
+    customer = None
+    if function_service.public:
+        execute_function = True
+    else:
+        cft = CustomerFunctionToken.objects.filter(
+            token_id=request.headers.get("Api-Key"), function_service=function_service
+        ).first()
+        if cft:
+            customer = cft.customer
+            execute_function = True
+
+    if execute_function:
         environment_variables = FunctionServiceEnvironmentVariable.objects.filter(
             function_service=function_service
         )
@@ -57,7 +66,7 @@ def execute_function(request, domain, function_url):
             parameters["ENV"][
                 environment_variable.name
             ] = environment_variable.load_value
-        status_code, response_data = function_service.execute(request, **parameters)
+        status_code, response_data = function_service.execute(request, customer, **parameters)
         return JsonResponse(response_data, status=status_code)
     else:
         return JsonResponse({"error": "invalid token"}, status=403)
