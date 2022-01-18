@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import permission_required
 from .models import (
     DomainFunctionService,
     FunctionService,
+    FunctionServiceExecution,
     CustomerFunctionToken,
     FunctionServiceEnvironmentVariable,
     Customer,
@@ -21,6 +22,7 @@ from .models import (
 from .business import (
     FunctionServiceBusiness,
     FunctionServiceEnvironmentVariableBusiness,
+    FunctionServiceExecutionBusiness,
     DomainFunctionServiceBusiness,
     CustomerBusiness,
     CustomerFunctionBusiness,
@@ -66,7 +68,9 @@ def execute_function(request, domain, function_url):
             parameters["ENV"][
                 environment_variable.name
             ] = environment_variable.load_value
-        status_code, response_data = function_service.execute(request, customer, **parameters)
+        status_code, response_data = function_service.execute(
+            request, customer, **parameters
+        )
         return JsonResponse(response_data, status=status_code)
     else:
         return JsonResponse({"error": "invalid token"}, status=403)
@@ -87,6 +91,23 @@ class FunctionListView(ListView):
     paginate_by = 10
     model = FunctionService
     business_class = FunctionServiceBusiness
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.business = self.business_class.factory()
+
+    def get_queryset(self):
+        return self.business.get_query_set(
+            params=self.request.GET, user=self.request.user
+        )
+
+
+@method_decorator(permission_required(settings.API_VIEWER), name="get")
+class FunctionExecutionListView(ListView):
+    template_name = "function/function-execution-list.html"
+    paginate_by = 10
+    model = FunctionServiceExecution
+    business_class = FunctionServiceExecutionBusiness
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -133,11 +154,16 @@ class FunctionView(View):
                 function_service=function
             )
             customers = Customer.objects.filter(team=function.team).order_by("name")
+            executions = FunctionServiceExecution.objects.filter(
+                function_service=function
+            ).order_by("-created_dt")[0:20]
             extra = {"script": function.code}
             extra["function"] = function
             extra["environment_variable"] = environment_variable
             extra["customer_function"] = customer_function
             extra["customers"] = customers
+            extra["executions"] = executions
+
         else:
             extra = {}
             form = FunctionServiceForm(user=request.user)
@@ -145,6 +171,27 @@ class FunctionView(View):
             request,
             "function/function.html",
             {"form": form, "extra": extra},
+        )
+
+
+class FunctionExecutionView(View):
+    business_class = FunctionServiceExecutionBusiness
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.business = self.business_class.factory()
+
+    @method_decorator(permission_required(settings.API_VIEWER))
+    def get(self, request: HttpRequest, execution_id: int) -> HttpResponse:
+        function_service_execution = self.business.get(
+            execution_id=execution_id, user=request.user
+        )
+        return render(
+            request,
+            "function/function-execution.html",
+            {
+                "function_execution": function_service_execution,
+            },
         )
 
 
