@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from .models import (
     CustomerFunctionToken,
     FunctionService,
+    FunctionServiceExecution,
     FunctionServiceEnvironmentVariable,
     DomainFunctionService,
     Customer,
@@ -62,6 +63,47 @@ class FunctionServiceBusiness(pydantic.BaseModel):
             object_list = self.model_class.objects.all().order_by(order_by)
         if user:
             object_list = object_list.filter(team__in=get_user_team(user))
+        return object_list
+
+
+class FunctionServiceExecutionBusiness(pydantic.BaseModel):
+    """
+    Business logic related with schedule
+    """
+
+    model_class: Type[Model]
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    @classmethod
+    def factory(
+        cls, model_class=FunctionServiceExecution
+    ) -> "FunctionServiceExecutionBusiness":
+        return cls(model_class=model_class)
+
+    def get(self, execution_id: int = None, user=None) -> Model:
+        function_service_execution = self.model_class.objects.get(id=execution_id)
+        if user and not validate_team_user(
+            user, function_service_execution.function_service.team
+        ):
+            raise ObjectNotFound("Function Not Found")
+        return function_service_execution
+
+    def get_query_set(self, params: Dict, user=None):
+        name = params.get("name")
+        order_by = params.get("order_by", "-id")
+        if name:
+            object_list = self.model_class.objects.filter(
+                Q(function_service__name__icontains=name)
+                | Q(customer__name__icontains=name)
+            )
+        else:
+            object_list = self.model_class.objects.all().order_by(order_by)
+        if user:
+            object_list = object_list.filter(
+                function_service__team__in=get_user_team(user)
+            )
         return object_list
 
 
