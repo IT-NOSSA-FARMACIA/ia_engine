@@ -306,6 +306,22 @@ class FunctionServiceExecution(models.Model):
     )
     status_code = models.IntegerField(blank=True, null=True)
 
+    def get_html_hyperlink(self) -> str:
+        function_link = reverse("api_engine:function-execution", args=(self.id,))
+        return f"<a href='{function_link}'>{self.id}</a>"
+
+    def get_badge_status_code(self) -> str:
+        badge_status = "info"
+        if self.status_code:
+            if self.status_code >= 200 and self.status_code < 300:
+                badge_status = "success"
+            elif self.status_code >= 300 and self.status_code < 400:
+                badge_status = "warning"
+            elif self.status_code >= 400 and self.status_code < 600:
+                badge_status = "danger"
+        badge = f"<span class='badge bg-{badge_status}'>{self.status_code}</span>"
+        return badge
+
     def __str__(self) -> str:
         return self.function_service.name
 
