@@ -44,7 +44,7 @@ from core.utils import validate_team_user, get_user_team
 @method_decorator(permission_required(settings.AUTOMATION_VIEWER), name="get")
 class ScheduleListView(ListView):
     template_name = "schedule/schedule-list.html"
-    paginate_by = 5
+    paginate_by = 10
     model = Schedule
     business_class = ScheduleBusiness
     ordering = ["-id"]
@@ -157,7 +157,7 @@ class EnvironmentVariableView(View):
 @method_decorator(permission_required(settings.AUTOMATION_VIEWER), name="get")
 class ActionListView(ListView):
     template_name = "actions/actions-list.html"
-    paginate_by = 5
+    paginate_by = 10
     model = Action
     business_class = ActionBusiness
 
