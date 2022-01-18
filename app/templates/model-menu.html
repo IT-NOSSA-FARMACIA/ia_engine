@@ -49,19 +49,22 @@
                     </ul>
                 </li>
 
-                <li class="sidebar-item {% active 'task_engine:schedule-execution-list, task_engine:schedule-execution, task_engine:ticket-list, task_engine:ticket' %} has-sub">
+                <li class="sidebar-item {% active 'task_engine:schedule-execution-list, task_engine:schedule-execution, task_engine:ticket-list, task_engine:ticket, api_engine:function-execution-list, api_engine:function-execution' %} has-sub">
                     <a href="#" class='sidebar-link'>
                         <i data-feather="settings" width="20"></i>
                         <span>Execuções</span>
                     </a>
-                    <ul class="submenu {% active 'task_engine:schedule-execution-list, task_engine:schedule-execution, task_engine:ticket-list, task_engine:ticket' %}">
+                    <ul class="submenu {% active 'task_engine:schedule-execution-list, task_engine:schedule-execution, task_engine:ticket-list, task_engine:ticket, api_engine:function-execution-list, api_engine:function-execution' %}">
                         <li>
                             <a href="{% url 'task_engine:schedule-execution-list' %}">Execuções Schedule</a>
                         </li>
 
                         <li>
                             <a href="{% url 'task_engine:ticket-list' %}">Tickets</a>
-                        </li>                          
+                        </li> 
+                        <li>
+                            <a href="{% url 'api_engine:function-execution-list' %}">API Logs</a>
+                        </li>                           
                     </ul>
                 </li>
 

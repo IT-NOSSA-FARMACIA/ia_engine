@@ -1,0 +1,124 @@
+{% extends "model-page.html"%}
+{% block content %}
+{% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load execution_extras %}
+
+<link rel="stylesheet" href="{% static '/vendors/codemirror/lib/codemirror.css' %}">
+<script src="{% static '/vendors/codemirror/lib/codemirror.js' %}"></script>
+<script src="{% static '/vendors/codemirror/mode/python/python.js' %}"></script>
+<script src="{% static '/vendors/codemirror/addon/selection/active-line.js' %}"></script>
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/monokai.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/darcula.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/dracula.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/colorforth.css' %}">
+<link rel="stylesheet" href="{% static '/vendors/codemirror/theme/eclipse.css' %}">
+
+<style>
+.CodeMirror {border: 1px solid #aaa;}
+</style>
+
+<div class="page-title">
+    <h3>{% translate "API" %}</h3>
+</div>
+<section class="section">
+    <div class="card">
+        <div class="card-header">
+            API Log
+        </div>
+
+
+        <div class="card-body">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home"
+                        role="tab" aria-controls="home" aria-selected="true">Log</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <div class="card-body">
+                        {% if form.erros %}
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <div class="alert alert-danger">
+                                        <strong>{{ error|escape }}</strong>
+                                    </div>
+                                {% endfor %}
+                            {% endfor %}
+                        {% endif %}
+
+                        <div class="row mb-5">
+                            <div class="col-sm-6 col-lg-6 col-md-6 col-xs-6" align="left">
+                                {{ function_execution.get_badge_status_code | safe}}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                <b>ID</b>
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                <b>Data da chamada</b>
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                <b>Parceiro</b>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                {{ function_execution.id }}
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                {{ function_execution.created_dt }}
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                {{ function_execution.customer.name }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                <b>Função</b>
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                <b>URL</b>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                {{ function_execution.function_service.get_html_hyperlink | safe }}
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-md-4 col-xs-4">
+                                {{ function_execution.function_service.full_url }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="exampleFormControlTextarea1" class="form-label"><b>Request</b></label>
+                            <textarea class="form-control" rows="10" disabled>{{ function_execution.request }}</textarea>
+                        </div>   
+
+                        <div class="mb-3">
+                            <label for="exampleFormControlTextarea1" class="form-label"><b>Response</b></label>
+                            <textarea class="form-control" rows="10" disabled>{{ function_execution.response }}</textarea>
+                        </div>   
+
+                        <div class="mb-3">
+                            <label for="exampleFormControlTextarea1" class="form-label"><b>Log da Função</b></label>
+                            <textarea class="form-control" rows="10" disabled>{{ function_execution.output }}</textarea>
+                        </div>   
+
+
+                    
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}

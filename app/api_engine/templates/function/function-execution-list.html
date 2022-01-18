@@ -1,0 +1,94 @@
+{% extends "model-page.html"%}
+{% block content %}
+{% load i18n %}
+{% load static %}
+{% load list_extras %}
+{% load execution_extras %}
+
+
+
+<div class="page-title">
+    <h3>{% translate "APIs" %}</h3>
+</div>
+<section class="section">
+
+    <div class="card">
+        <div class="card-header">
+            Lista de Chamadas de APIs
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="form-group mb-1">
+                    <input class="form-control" type="text" name="name" placeholder="Buscar por nome...">            
+                </div>
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            <form>
+
+            <table class="table table-striped mt-4 table-responsive-md">
+                <thead>
+                    <tr>
+                        <th>
+                            <a class="text-green" href="{% order_by_href "id" request.GET.order_by request.GET.name %}">
+                            {% order_by "id" request.GET.order_by as arrow_id %}
+                            {{ arrow_id | safe}}
+                            ID 
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green" href="{% order_by_href "function_service__name" request.GET.order_by request.GET.name %}">
+                            {% order_by "function_service__name" request.GET.order_by as arrow_function_service_name %}
+                            {{ arrow_function_service_name | safe}}
+                            API 
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green" href="{% order_by_href "function_service__name" request.GET.order_by request.GET.name %}">
+                            {% order_by "function_service__name" request.GET.order_by as arrow_function_service_name %}
+                            {{ arrow_function_service_name | safe}}
+                            URL 
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "created_dt" request.GET.order_by %}">
+                            {% order_by "created_dt" request.GET.order_by as arrow_created_dt %}
+                            {{ arrow_created_dt | safe}}
+                            Data
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "customer__name" request.GET.order_by request.GET.name %}">
+                            {% order_by "customer__name" request.GET.order_by as arrow_customer_name %}
+                            {{ arrow_customer_name | safe}}
+                            Parceiro
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-green"  href="{% order_by_href "status_code" request.GET.order_by request.GET.name %}">
+                            {% order_by "status_code" request.GET.order_by as arrow_status_code %}
+                            {{ arrow_status_code | safe}}
+                            Status Code
+                            </a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for execution in object_list %}
+                        <tr>
+                            <td>{{ execution.get_html_hyperlink | safe }}</a></td>
+                            <td>{{ execution.function_service.get_html_hyperlink | safe }}</td>
+                            <td>{{ execution.function_service.full_url | safe }}</td>
+                            <td>{{ execution.created_dt }}</td>
+                            <td>{{ execution.customer.get_html_hyperlink | safe }}</td>
+                            <td>{{ execution.get_badge_status_code | safe }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            
+            {% include "pagination.html" %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}
