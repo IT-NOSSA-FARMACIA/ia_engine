@@ -45,6 +45,10 @@
                         <a class="nav-link" id="customers-tab" data-bs-toggle="tab" href="#customers"
                             role="tab" aria-controls="customers" aria-selected="false">Parceiros</a>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="executions-tab" data-bs-toggle="tab" href="#executions"
+                            role="tab" aria-controls="executions" aria-selected="false">Logs Recentes</a>
+                    </li>
                 {% endif %}
             </ul>
             <div class="tab-content" id="myTabContent">
@@ -124,6 +128,10 @@
 
                 <div class="tab-pane fade" id="customers" role="tabpanel" aria-labelledby="customers-tab">
                     {% include "function/customers-tab.html" %}
+                </div>
+
+                <div class="tab-pane fade" id="executions" role="tabpanel" aria-labelledby="executions-tab">
+                    {% include "function/executions-tab.html" %}
                 </div>
 
             </div>

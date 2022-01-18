@@ -1,0 +1,25 @@
+{% load execution_extras %}
+<div class="card-body">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Data</th>
+                    <th>Parceiro</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+        <tbody>
+            {% for execution in extra.executions %}
+            <tr>
+                <td>{{ execution.get_html_hyperlink|safe }}</td>
+                <td>{{ execution.created_dt }}</td>
+                <td>{{ execution.customer.get_html_hyperlink | safe }}</td>
+                <td>{{ execution.get_badge_status_code | safe }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    </div>
+</div>
