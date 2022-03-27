@@ -125,6 +125,7 @@ def process_ticket(ticket_id):
     ticket_parameters = TicketParameter.objects.filter(ticket=ticket)
     for ticket_parameter in ticket_parameters:
         parameters[ticket_parameter.name] = ticket_parameter.value
+    parameters["ticket_id"] = ticket.id
 
     steps = StepSchedule.objects.filter(schedule=ticket.schedule).order_by(
         "execution_order"
