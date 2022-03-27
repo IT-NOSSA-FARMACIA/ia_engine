@@ -1,3 +1,4 @@
+from core.models import Team
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import ListView, View
 from django.http import (
@@ -10,6 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
+
+from .api_documentation import OpenAPIDoc
 
 from .models import (
     DomainFunctionService,
@@ -76,13 +79,32 @@ def execute_function(request, domain, function_url):
         return JsonResponse({"error": "invalid token"}, status=403)
 
 
-def get_openapi_function(request, domain, function_url):
+def get_openapi_function(
+    request: HttpRequest, domain: DomainFunctionService, function_url: str
+) -> HttpResponse:
     function_service = get_object_or_404(
         FunctionService, url_name=function_url, domain__url_name=domain
     )
-    response_data = function_service.get_openapi_schema()
-    return HttpResponse(response_data)
-    # return JsonResponse(response_data)
+    openapi_schema = OpenAPIDoc.get_openapi_schema_by_function_service(function_service)
+    return HttpResponse(openapi_schema)
+
+
+def get_openapi_function_by_domain(request, domain_url_name):
+    domain = get_object_or_404(
+        DomainFunctionService,
+        url_name=domain_url_name,
+    )
+    openapi_schema = OpenAPIDoc.get_openapi_schema_by_domain_function_service(domain)
+    return HttpResponse(openapi_schema)
+
+
+def get_openapi_function_by_team(request, team_name):
+    team = get_object_or_404(
+        Team,
+        name=team_name,
+    )
+    openapi_schema = OpenAPIDoc.get_openapi_schema_by_team(team)
+    return HttpResponse(openapi_schema)
 
 
 @method_decorator(permission_required(settings.API_VIEWER), name="get")
