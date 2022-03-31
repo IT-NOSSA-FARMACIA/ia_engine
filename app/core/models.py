@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 class Team(models.Model):
     name = models.CharField(max_length=100)
-    slash_name = models.CharField(max_length=100)
+    slash_name = models.CharField(max_length=100, blank=True, null=True)
     user = models.ManyToManyField(User)
     created_date = models.DateTimeField(auto_now_add=True)
     last_updated_date = models.DateTimeField(auto_now=True)
