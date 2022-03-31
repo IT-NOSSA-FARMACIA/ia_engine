@@ -8,25 +8,24 @@ import json
 
 
 class OpenAPIDoc:
-    def __init__(self):
-        pass
-
     @classmethod
     def get_openapi_schema_by_function_service(cls, function_service) -> str:
         exec(function_service.code, globals())
         content_request_body = {}
         content_response = {}
         try:
-            content_request_body["application/json"] = {
-                "schema": PydanticSchema(schema_class=Request)
-            }
+            if function_service.has_request_class:
+                content_request_body["application/json"] = {
+                    "schema": PydanticSchema(schema_class=Request)
+                }
         except NameError:
             pass
 
         try:
-            content_response["application/json"] = {
-                "schema": PydanticSchema(schema_class=Response)
-            }
+            if function_service.has_response_class:
+                content_response["application/json"] = {
+                    "schema": PydanticSchema(schema_class=Response)
+                }
         except NameError:
             pass
 
@@ -45,19 +44,22 @@ class OpenAPIDoc:
         if function_service.get_http_method_display() == "GET":
             content_request_body = {}
             try:
-                schema_request = json.loads(Request.schema_json())
-                properties = schema_request["properties"]
-                properties_required = schema_request["required"]
-                for key, value in properties.items():
-                    print(key, value)
-                    request_parameters.append(
-                        {
-                            "in": "query",
-                            "name": key,
-                            "schema": {"type": value["type"]},
-                            "required": True if key in properties_required else False,
-                        }
-                    )
+                if function_service.has_request_class:
+                    schema_request = json.loads(Request.schema_json())
+                    properties = schema_request["properties"]
+                    properties_required = schema_request["required"]
+                    for key, value in properties.items():
+                        print(key, value)
+                        request_parameters.append(
+                            {
+                                "in": "query",
+                                "name": key,
+                                "schema": {"type": value["type"]},
+                                "required": True
+                                if key in properties_required
+                                else False,
+                            }
+                        )
             except NameError:
                 pass
 
@@ -114,45 +116,48 @@ class OpenAPIDoc:
             )
             function_path = function_openapi_schema["paths"]
             function_path_key = list(function_path.keys())[0]
-            response_content_function = function_path[function_path_key][
-                function_service.get_http_method_display().lower()
-            ]["responses"]["200"]["content"]
 
-            if response_content_function:
-                response_content_function["application/json"]["schema"][
-                    "$ref"
-                ] = f"#/components/schemas/Response {function_service.url_name}"
-
-            request_content_function = function_path[function_path_key][
-                function_service.get_http_method_display().lower()
-            ]["requestBody"]["content"]
-            if request_content_function:
-                request_content_function["application/json"]["schema"][
-                    "$ref"
-                ] = f"#/components/schemas/Request {function_service.url_name}"
-
-                request_function_service = function_openapi_schema["components"][
-                    "schemas"
-                ]["Request"]
-                openapi_schema["components"]["schemas"][
-                    f"Request {function_service.url_name}"
-                ] = request_function_service
-                openapi_schema["components"]["schemas"][
-                    f"Request {function_service.url_name}"
-                ]["title"] = f"Request {function_service.url_name}"
-
-            response_function_service = function_openapi_schema["components"][
-                "schemas"
-            ]["Response"]
             openapi_schema["paths"][function_path_key] = function_path[
                 function_path_key
             ]
-            openapi_schema["components"]["schemas"][
-                f"Response {function_service.url_name}"
-            ] = response_function_service
-            openapi_schema["components"]["schemas"][
-                f"Response {function_service.url_name}"
-            ]["title"] = f"Response {function_service.url_name}"
+
+            if function_service.has_response_class:
+                response_content_function = function_path[function_path_key][
+                    function_service.get_http_method_display().lower()
+                ]["responses"]["200"]["content"]
+
+                if response_content_function:
+                    response_content_function["application/json"]["schema"][
+                        "$ref"
+                    ] = f"#/components/schemas/Response {function_service.url_name}"
+                    response_function_service = function_openapi_schema["components"][
+                        "schemas"
+                    ]["Response"]
+                    openapi_schema["components"]["schemas"][
+                        f"Response {function_service.url_name}"
+                    ] = response_function_service
+                    openapi_schema["components"]["schemas"][
+                        f"Response {function_service.url_name}"
+                    ]["title"] = f"Response {function_service.url_name}"
+
+            if function_service.has_request_class:
+                request_content_function = function_path[function_path_key][
+                    function_service.get_http_method_display().lower()
+                ]["requestBody"]["content"]
+
+                if request_content_function:
+                    request_content_function["application/json"]["schema"][
+                        "$ref"
+                    ] = f"#/components/schemas/Request {function_service.url_name}"
+                    request_function_service = function_openapi_schema["components"][
+                        "schemas"
+                    ]["Request"]
+                    openapi_schema["components"]["schemas"][
+                        f"Request {function_service.url_name}"
+                    ] = request_function_service
+                    openapi_schema["components"]["schemas"][
+                        f"Request {function_service.url_name}"
+                    ]["title"] = f"Request {function_service.url_name}"
 
         return json.dumps(openapi_schema)
 
@@ -178,44 +183,51 @@ class OpenAPIDoc:
             )
             function_path = function_openapi_schema["paths"]
             function_path_key = list(function_path.keys())[0]
-            response_content_function = function_path[function_path_key][
-                function_service.get_http_method_display().lower()
-            ]["responses"]["200"]["content"]
 
-            if response_content_function:
-                response_content_function["application/json"]["schema"][
-                    "$ref"
-                ] = f"#/components/schemas/Response {function_service.domain.url_name} {function_service.url_name}"
-
-            request_content_function = function_path[function_path_key][
-                function_service.get_http_method_display().lower()
-            ]["requestBody"]["content"]
-            if request_content_function:
-                request_content_function["application/json"]["schema"][
-                    "$ref"
-                ] = f"#/components/schemas/Request {function_service.domain.url_name} {function_service.url_name}"
-
-                request_function_service = function_openapi_schema["components"][
-                    "schemas"
-                ]["Request"]
-                openapi_schema["components"]["schemas"][
-                    f"Request {function_service.domain.url_name} {function_service.url_name}"
-                ] = request_function_service
-                openapi_schema["components"]["schemas"][
-                    f"Request {function_service.domain.url_name} {function_service.url_name}"
-                ]["title"] = f"Request {function_service.domain.url_name} {function_service.url_name}"
-
-            response_function_service = function_openapi_schema["components"][
-                "schemas"
-            ]["Response"]
             openapi_schema["paths"][function_path_key] = function_path[
                 function_path_key
             ]
-            openapi_schema["components"]["schemas"][
-                f"Response {function_service.domain.url_name} {function_service.url_name}"
-            ] = response_function_service
-            openapi_schema["components"]["schemas"][
-                f"Response {function_service.domain.url_name} {function_service.url_name}"
-            ]["title"] = f"Response {function_service.domain.url_name} {function_service.url_name}"
+
+            if function_service.has_response_class:
+                response_content_function = function_path[function_path_key][
+                    function_service.get_http_method_display().lower()
+                ]["responses"]["200"]["content"]
+
+                if response_content_function:
+                    response_content_function["application/json"]["schema"][
+                        "$ref"
+                    ] = f"#/components/schemas/Response {function_service.domain.url_name} {function_service.url_name}"
+                    response_function_service = function_openapi_schema["components"][
+                        "schemas"
+                    ]["Response"]
+                    openapi_schema["components"]["schemas"][
+                        f"Response {function_service.domain.url_name} {function_service.url_name}"
+                    ] = response_function_service
+                    openapi_schema["components"]["schemas"][
+                        f"Response {function_service.domain.url_name} {function_service.url_name}"
+                    ][
+                        "title"
+                    ] = f"Response {function_service.domain.url_name} {function_service.url_name}"
+
+            if function_service.has_request_class:
+                request_content_function = function_path[function_path_key][
+                    function_service.get_http_method_display().lower()
+                ]["requestBody"]["content"]
+
+                if request_content_function:
+                    request_content_function["application/json"]["schema"][
+                        "$ref"
+                    ] = f"#/components/schemas/Request {function_service.domain.url_name} {function_service.url_name}"
+                    request_function_service = function_openapi_schema["components"][
+                        "schemas"
+                    ]["Request"]
+                    openapi_schema["components"]["schemas"][
+                        f"Request {function_service.domain.url_name} {function_service.url_name}"
+                    ] = request_function_service
+                    openapi_schema["components"]["schemas"][
+                        f"Request {function_service.domain.url_name} {function_service.url_name}"
+                    ][
+                        "title"
+                    ] = f"Request {function_service.domain.url_name} {function_service.url_name}"
 
         return json.dumps(openapi_schema)
