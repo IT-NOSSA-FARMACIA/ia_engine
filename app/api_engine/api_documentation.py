@@ -121,7 +121,7 @@ class OpenAPIDoc:
             if response_content_function:
                 response_content_function["application/json"]["schema"][
                     "$ref"
-                ] = f"#/components/schemas/Response {function_service.name}"
+                ] = f"#/components/schemas/Response {function_service.url_name}"
 
             request_content_function = function_path[function_path_key][
                 function_service.get_http_method_display().lower()
@@ -129,17 +129,17 @@ class OpenAPIDoc:
             if request_content_function:
                 request_content_function["application/json"]["schema"][
                     "$ref"
-                ] = f"#/components/schemas/Request {function_service.name}"
+                ] = f"#/components/schemas/Request {function_service.url_name}"
 
                 request_function_service = function_openapi_schema["components"][
                     "schemas"
                 ]["Request"]
                 openapi_schema["components"]["schemas"][
-                    f"Request {function_service.name}"
+                    f"Request {function_service.url_name}"
                 ] = request_function_service
                 openapi_schema["components"]["schemas"][
-                    f"Request {function_service.name}"
-                ]["title"] = f"Request {function_service.name}"
+                    f"Request {function_service.url_name}"
+                ]["title"] = f"Request {function_service.url_name}"
 
             response_function_service = function_openapi_schema["components"][
                 "schemas"
@@ -148,11 +148,11 @@ class OpenAPIDoc:
                 function_path_key
             ]
             openapi_schema["components"]["schemas"][
-                f"Response {function_service.name}"
+                f"Response {function_service.url_name}"
             ] = response_function_service
             openapi_schema["components"]["schemas"][
-                f"Response {function_service.name}"
-            ]["title"] = f"Response {function_service.name}"
+                f"Response {function_service.url_name}"
+            ]["title"] = f"Response {function_service.url_name}"
 
         return json.dumps(openapi_schema)
 
@@ -185,7 +185,7 @@ class OpenAPIDoc:
             if response_content_function:
                 response_content_function["application/json"]["schema"][
                     "$ref"
-                ] = f"#/components/schemas/Response {function_service.name}"
+                ] = f"#/components/schemas/Response {function_service.domain.url_name} {function_service.url_name}"
 
             request_content_function = function_path[function_path_key][
                 function_service.get_http_method_display().lower()
@@ -193,17 +193,17 @@ class OpenAPIDoc:
             if request_content_function:
                 request_content_function["application/json"]["schema"][
                     "$ref"
-                ] = f"#/components/schemas/Request {function_service.name}"
+                ] = f"#/components/schemas/Request {function_service.domain.url_name} {function_service.url_name}"
 
                 request_function_service = function_openapi_schema["components"][
                     "schemas"
                 ]["Request"]
                 openapi_schema["components"]["schemas"][
-                    f"Request {function_service.name}"
+                    f"Request {function_service.domain.url_name} {function_service.url_name}"
                 ] = request_function_service
                 openapi_schema["components"]["schemas"][
-                    f"Request {function_service.name}"
-                ]["title"] = f"Request {function_service.name}"
+                    f"Request {function_service.domain.url_name} {function_service.url_name}"
+                ]["title"] = f"Request {function_service.domain.url_name} {function_service.url_name}"
 
             response_function_service = function_openapi_schema["components"][
                 "schemas"
@@ -212,10 +212,10 @@ class OpenAPIDoc:
                 function_path_key
             ]
             openapi_schema["components"]["schemas"][
-                f"Response {function_service.name}"
+                f"Response {function_service.domain.url_name} {function_service.url_name}"
             ] = response_function_service
             openapi_schema["components"]["schemas"][
-                f"Response {function_service.name}"
-            ]["title"] = f"Response {function_service.name}"
+                f"Response {function_service.domain.url_name} {function_service.url_name}"
+            ]["title"] = f"Response {function_service.domain.url_name} {function_service.url_name}"
 
         return json.dumps(openapi_schema)
