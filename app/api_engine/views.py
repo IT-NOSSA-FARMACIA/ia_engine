@@ -101,7 +101,7 @@ def get_openapi_function_by_domain(request, domain_url_name):
 def get_openapi_function_by_team(request, team_name):
     team = get_object_or_404(
         Team,
-        name=team_name,
+        slash_name=team_name,
     )
     openapi_schema = OpenAPIDoc.get_openapi_schema_by_team(team)
     return HttpResponse(openapi_schema)
