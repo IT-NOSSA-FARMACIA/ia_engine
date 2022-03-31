@@ -7,11 +7,14 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.conf import settings
 
+from functools import cached_property
+
 from io import StringIO
 from simple_history.models import HistoricalRecords
 from typing import Any
 
 from .choices import HTTP_METHOD_CHOICE, HTTP_METHOD_GET
+from .constants import FUNCTION_REQUEST_CLASS_NAME, FUNCTION_RESPONSE_CLASS_NAME
 
 import json
 import traceback
@@ -96,6 +99,14 @@ class FunctionService(models.Model):
     @property
     def swagger_doc_url(self):
         return f"{settings.SWAGGER_URL_TO_DOC}?url={self.full_url}" + "doc/"
+
+    @cached_property
+    def has_request_class(self):
+        return FUNCTION_REQUEST_CLASS_NAME in self.code
+
+    @cached_property
+    def has_response_class(self):
+        return FUNCTION_REQUEST_CLASS_NAME in self.code
 
     def execute(self, request, customer=None, *args, **kwargs) -> Any:
         stdout = StringIO()
