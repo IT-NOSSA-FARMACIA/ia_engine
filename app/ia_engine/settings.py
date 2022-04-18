@@ -8,4 +8,5 @@ include(
     "config/celery.py",
     "config/roles.py",
     "config/notification.py",
+    "config/development.py",
 )
