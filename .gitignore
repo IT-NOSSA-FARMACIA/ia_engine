@@ -124,5 +124,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /app/staticfiles
-
+/app/notebook
 scripts
+
+.vscode
+/app/mssql-driver/
