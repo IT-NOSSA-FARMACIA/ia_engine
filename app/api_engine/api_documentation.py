@@ -1,3 +1,4 @@
+from django.conf import settings
 from openapi_schema_pydantic import OpenAPI
 from openapi_schema_pydantic.util import (
     PydanticSchema,
@@ -70,6 +71,7 @@ class OpenAPIDoc:
                     "version": "v1",
                     "description": f"{function_service.description}",
                 },
+                "servers": [{"url": settings.IA_ENGINE_SERVER_SWAGGER}],
                 "paths": {
                     f"{function_service.full_url}": {
                         f"{function_service.get_http_method_display().lower()}": {
@@ -105,7 +107,7 @@ class OpenAPIDoc:
                 "description": "",
                 "version": "v1",
             },
-            "servers": [{"url": "/"}],
+            "servers": [{"url": settings.IA_ENGINE_SERVER_SWAGGER}],
             "paths": {},
             "components": {"schemas": {}},
         }
@@ -172,7 +174,7 @@ class OpenAPIDoc:
                 "description": "",
                 "version": "v1",
             },
-            "servers": [{"url": "/"}],
+            "servers": [{"url": settings.IA_ENGINE_SERVER_SWAGGER}],
             "paths": {},
             "components": {"schemas": {}},
         }
