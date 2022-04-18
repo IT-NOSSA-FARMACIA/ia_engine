@@ -68,13 +68,14 @@ def search_new_schedule():
 
 
 @task
-def execute_schedule(schedule_id):
+def execute_schedule(schedule_id, **kwargs):
     logger.info("starting task sync_new_calls")
     schedule = Schedule.objects.get(id=schedule_id)
     environment_variables = ScheduleEnvironmentVariable.objects.filter(
         schedule=schedule
     )
-    parameters = {"ENV": {}}
+    parameters = kwargs
+    parameters["ENV"] = {}
     for environment_variable in environment_variables:
         parameters["ENV"][environment_variable.name] = environment_variable.load_value
     logger.info(schedule.name)
