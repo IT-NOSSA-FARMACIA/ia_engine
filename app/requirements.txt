@@ -39,5 +39,6 @@ django-crispy-forms==1.12.0
 django-simple-history==3.0.0
 openapi-schema-pydantic==1.2.0
 django-cors-headers==3.8.0
+notebook==6.4.4
 pymssql==2.2.3
 zeep==4.1.0
