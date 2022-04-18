@@ -38,6 +38,8 @@ SWAGGER_URL_TO_DOC = env.str("SWAGGER_URL_TO_DOC", default="http://localhost/swa
 
 IA_ENGINE_HOST = env.str("IA_ENGINE_HOST", default="http://localhost/")
 
+IA_ENGINE_SERVER_SWAGGER = env.str("IA_ENGINE_SERVER_SWAGGER", default="/")
+
 
 # Application definition
 INSTALLED_APPS = [
