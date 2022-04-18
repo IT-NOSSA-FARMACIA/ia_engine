@@ -23,6 +23,12 @@ function execute_gunicorn() {
   echo "finish executing gunicorn"
 }
 
+function execute_development_notebook() {
+  echo -e "Running notebook server. \033[34;5mNEVER use this in production.\033[0m"
+  python manage.py shell_plus --notebook &
+  cd -
+}
+
 case ${IA_ENGINE_SERVICE:-development} in
 production)
   if [ ${RUN_COLLECT_STATIC:-0} -eq 1 ]; then
@@ -34,6 +40,7 @@ production)
   execute_gunicorn
   ;;
 development)
+  execute_development_notebook
   execute_development_server
   ;;
 *)
