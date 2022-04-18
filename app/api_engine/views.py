@@ -41,6 +41,8 @@ from django.forms import model_to_dict
 from django.conf import settings
 from django.contrib import messages
 
+import json
+
 
 @csrf_exempt
 def execute_function(request, domain, function_url):
@@ -86,7 +88,7 @@ def get_openapi_function(
         FunctionService, url_name=function_url, domain__url_name=domain
     )
     openapi_schema = OpenAPIDoc.get_openapi_schema_by_function_service(function_service)
-    return HttpResponse(openapi_schema)
+    return JsonResponse(json.loads(openapi_schema), json_dumps_params={"indent": 2})
 
 
 def get_openapi_function_by_domain(request, domain_url_name):
@@ -95,7 +97,7 @@ def get_openapi_function_by_domain(request, domain_url_name):
         url_name=domain_url_name,
     )
     openapi_schema = OpenAPIDoc.get_openapi_schema_by_domain_function_service(domain)
-    return HttpResponse(openapi_schema)
+    return JsonResponse(json.loads(openapi_schema), json_dumps_params={"indent": 2})
 
 
 def get_openapi_function_by_team(request, team_name):
@@ -104,7 +106,7 @@ def get_openapi_function_by_team(request, team_name):
         slash_name=team_name,
     )
     openapi_schema = OpenAPIDoc.get_openapi_schema_by_team(team)
-    return HttpResponse(openapi_schema)
+    return JsonResponse(json.loads(openapi_schema), json_dumps_params={"indent": 2})
 
 
 @method_decorator(permission_required(settings.API_VIEWER), name="get")
