@@ -209,7 +209,7 @@ class Ticket(models.Model):
 class TicketParameter(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    value = models.TextField()
+    value = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:
         value = self.value[0:50]
