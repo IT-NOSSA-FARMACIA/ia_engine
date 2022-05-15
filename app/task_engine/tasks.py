@@ -159,7 +159,7 @@ def process_ticket(ticket_id, list_action_order_to_process: List = None):
                     )
                 if retry_ticket := data.get("retry_ticket"):
                     list_action_order_to_process = data.get(
-                        "step_actions_to_process", []
+                        "step_actions_to_process", ticket_business.get_list_step_actions_forward(step)
                     )
                     ticket_business.create_task(
                         ticket=ticket,

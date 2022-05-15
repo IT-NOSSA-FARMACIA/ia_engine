@@ -292,6 +292,15 @@ class TicketBusiness(pydantic.BaseModel):
             schedule=schedule, schedule_execution=schedule_execution
         )
 
+    def get_list_step_actions_forward(self, step: StepSchedule) -> List:
+        total_step_schedule = StepSchedule.objects.filter(
+            schedule=step.schedule
+        ).count()
+        return [
+            order_execution
+            for order_execution in range(step.execution_order, total_step_schedule)
+        ]
+
     def create_task(
         self, ticket: Ticket, list_action_order_to_process: List = None, seconds_delay=0
     ):
