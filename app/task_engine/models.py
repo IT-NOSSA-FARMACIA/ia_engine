@@ -35,16 +35,21 @@ class Script(models.Model):
         stdout = StringIO()
         stderr = StringIO()
         return_data = []
+        control_value = ""
         with redirect_stdout(stdout):
-            exec(self.code, globals())
             try:
-                return_data = main(**parm)
+                exec(self.code, globals())
+                result = main(**parm)
+                if isinstance(result, tuple):
+                    return_data, control_value = result
+                else:
+                    return_data = result
             except Exception:
                 with redirect_stdout(stderr):
                     traceback.print_exc(file=sys.stdout)
         script_log = stdout.getvalue() + stderr.getvalue()
         status = not bool(stderr.getvalue())
-        return status, return_data, script_log
+        return status, return_data, script_log, str(control_value)
 
     class Meta:
         db_table = "script"
@@ -260,6 +265,17 @@ class ScheduleEnvironmentVariable(models.Model):
         db_table = "schedule_environment_variable"
 
 
-# from django.core import signing
-# signing.loads("InNlbmhhMTIzIg:1lzSdt:-nZQEqod0IMU7gXdrvmGBQ4ZKZ-ZXEsYHPOaCKJKQhY")
-# signing.dumps(('senha123'))
+class TeamWorker(models.Model):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    suffix_worker_name = models.CharField(max_length=50)
+    active = models.BooleanField(default=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    last_updated_date = models.DateTimeField(auto_now=True)
+    concurrency = models.IntegerField()
+    history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return f"{self.team.name}"
+
+    class Meta:
+        db_table = "team_worker"
