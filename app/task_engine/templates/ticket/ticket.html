@@ -57,12 +57,14 @@
                              
                         <div class="row mb-5">
                             <div class="col-sm-10 col-lg-10 col-md-10 col-xs-10" align="left">
-                                <span class="badge {% badge_status_execution ticket.execution_status %}" style="width: 100px; height: 30px; font-size: 15px">{{ ticket.get_execution_status_display }}</span>
+                                <span class="badge {% badge_status_execution ticket.execution_status %}" style="width: 120px; height: 30px; font-size: 15px">{{ ticket.get_execution_status_display }}</span>
                             </div>
                                         
                             <div class="col-sm-2 col-lg-2 col-md-2 col-xs-2" align="left">
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-reprocess-ticket"><i data-feather="repeat" style="color: white"></i>&nbsp;Reprocessar</button>
-                            </div>                           
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-select-and-reprocess-ticket"><i data-feather="repeat" style="color: white"></i>&nbsp;Reprocessar</button>
+                                </div>
+                            </div>                          
                         </div>
 
                         <div class="row">
@@ -156,11 +158,11 @@
     </div>
 </section>
 
-    <!--Modal Exclui Variável de Ambiente -->
-    <div class="modal fade text-left" id="modal-reprocess-ticket" tabindex="-1"
+    <!--Modal Seleciona Actions e Reprocessa Ticket -->
+    <div class="modal fade text-left" id="modal-select-and-reprocess-ticket" tabindex="-1"
         role="dialog" aria-labelledby="myModalLabel120"
         aria-hidden="true">
-        <form action={% url 'task_engine:reprocess_ticket' ticket.id %} method='POST'>{% csrf_token %}   
+        <form id="form-select-and-reprocess-ticket" action={% url 'task_engine:reprocess_ticket' ticket.id %} method='POST'>{% csrf_token %}   
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
                 role="document">
                 <div class="modal-content">
@@ -172,7 +174,22 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        Tem certeza que deseja reprocessar este ticket?
+                        <p>Selecione as actions a serem reprocessadas:</p>  
+                        <div class="checkbox-group required">
+                            {% for step_schedule in step_schedule_list %}
+                                <div class="form-check">
+                                    <input 
+                                        class="form-check-input" 
+                                        type="checkbox" 
+                                        value="{{ step_schedule.execution_order }}" 
+                                        name="list_action_order_to_process" 
+                                        id="step-schedule-option-{{ step_schedule.execution_order}}" checked>
+                                    <label class="form-check-label" for="flexCheckDefault">
+                                    {{ step_schedule }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button"
@@ -183,7 +200,7 @@
                         </button>
                         <button type="submit" class="btn btn-success ml-1">
                             <i class="bx bx-check d-block d-sm-none"></i>
-                            <span class="d-none d-sm-block"><b>Sim</b></span>
+                            <span class="d-none d-sm-block"><b>Reprocessar</b></span>
                         </button>
                     </div>
                 </div>
@@ -194,6 +211,13 @@
 
 <script>
     $(".alert-success").fadeTo(2000, 500).slideUp(500, function(){});
+
+    $('form#form-select-and-reprocess-ticket').submit(function(){
+        if ($('div.checkbox-group.required :checkbox:checked').length == 0){
+            alert("Você deve selecionar ao menos uma action")
+            return false;
+        }        
+    });
 </script>
 
 

@@ -9,7 +9,7 @@ from django.utils import timezone
 from task_engine import tasks
 from core.utils import validate_team_user, get_user_team
 
-from .choices import EXECUTION_STATUS_QUEUE
+from .choices import EXECUTION_STATUS_QUEUE, EXECUTION_STATUS_QUEUE_RETRY
 from .tasks import process_ticket, execute_schedule
 from .models import (
     Schedule,
@@ -293,19 +293,25 @@ class TicketBusiness(pydantic.BaseModel):
         )
 
     def create_task(
-        self, ticket: Ticket, list_action_order_to_process: List = [], seconds_delay=0
+        self, ticket: Ticket, list_action_order_to_process: List = None, seconds_delay=0
     ):
+        if not list_action_order_to_process:
+            list_action_order_to_process = []
         team_worker = TeamWorker.objects.filter(team=ticket.schedule.team).first()
         if team_worker:
             queue_name = f"process-ticket-{team_worker.suffix_worker_name}"
         else:
             queue_name = "process-ticket"
 
-        ticket.execution_status = EXECUTION_STATUS_QUEUE
+        if TicketActionLog.objects.filter(ticket=ticket).exists():
+            ticket.execution_status = EXECUTION_STATUS_QUEUE_RETRY
+        else:
+            ticket.execution_status = EXECUTION_STATUS_QUEUE
         ticket.save()
         tasks.process_ticket.apply_async(
             kwargs={
                 "ticket_id": ticket.id,
+                "list_action_order_to_process": list_action_order_to_process,
             },
             queue=queue_name,
             countdown=seconds_delay,

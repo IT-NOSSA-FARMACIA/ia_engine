@@ -8,6 +8,7 @@ BADGE_STATUS = {
     "SC": "bg-success",
     "ER": "bg-danger",
     "QU": "bg-warning",
+    "RT": "bg-warning",
 }
 
 

@@ -293,6 +293,9 @@ class TicketView(View):
                 "ticket": ticket,
                 "ticket_executions": ticket_executions,
                 "ticket_parameters": ticket_parameters,
+                "step_schedule_list": ticket.schedule.stepschedule_set.all().order_by(
+                    "execution_order"
+                ),
             },
         )
 
@@ -309,6 +312,9 @@ class ReprocessTicketView(View):
         ticket = self.business.get(ticket_id=ticket_id)
         self.business.create_task(
             ticket=ticket,
+            list_action_order_to_process=request.POST.getlist(
+                "list_action_order_to_process"
+            ),
         )
         messages.success(request, "Ticket enviado para reprocessamento.")
         return redirect(reverse("task_engine:ticket", args=(ticket.id,)))

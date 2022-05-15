@@ -3,6 +3,7 @@ from task_engine.choices import (
     EXECUTION_STATUS_SUCCESS,
     EXECUTION_STATUS_ERROR,
     EXECUTION_STATUS_QUEUE,
+    EXECUTION_STATUS_QUEUE_RETRY,
     EXECUTION_STATUS_PENDING,
     EXECUTION_STATUS_PROCESSING,
 )
@@ -93,7 +94,7 @@ def ticket_execution_with_error(time_to_search: int, user) -> int:
 
 def ticket_execution_queue(time_to_search: int, user) -> int:
     tickets = Ticket.objects.filter(
-        execution_status=EXECUTION_STATUS_QUEUE,
+        execution_status=[EXECUTION_STATUS_QUEUE, EXECUTION_STATUS_QUEUE_RETRY],
         created_date_ticket__gt=datetime.now().date() - timedelta(time_to_search),
         schedule__team__in=get_user_team(user),
     ).count()
