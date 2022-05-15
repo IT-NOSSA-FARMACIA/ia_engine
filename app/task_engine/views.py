@@ -306,7 +306,10 @@ class ReprocessTicketView(View):
 
     @method_decorator(permission_required(settings.AUTOMATION_DEVELOPER))
     def post(self, request: HttpRequest, ticket_id: int) -> HttpResponse:
-        ticket = self.business.reprocess_ticket(ticket_id=ticket_id)
+        ticket = self.business.get(ticket_id=ticket_id)
+        self.business.create_task(
+            ticket=ticket,
+        )
         messages.success(request, "Ticket enviado para reprocessamento.")
         return redirect(reverse("task_engine:ticket", args=(ticket.id,)))
 
