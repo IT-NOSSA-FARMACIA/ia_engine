@@ -4,6 +4,10 @@ from typing import Dict, Type, List
 from django.db.models import Model
 from django.db.models import Q
 from django.contrib.auth.models import User
+from django.utils import timezone
+
+from task_engine import tasks
+from core.utils import validate_team_user, get_user_team
 
 from .choices import EXECUTION_STATUS_QUEUE
 from .tasks import process_ticket, execute_schedule
@@ -17,8 +21,9 @@ from .models import (
     Ticket,
     TicketActionLog,
     TicketParameter,
+    TeamWorker,
 )
-from core.utils import validate_team_user, get_user_team
+
 from .exceptions import ObjectNotFound
 
 import pydantic
@@ -60,8 +65,14 @@ class ScheduleBusiness(pydantic.BaseModel):
         return object_schedule
 
     def execute(self, schedule_id: int):
+        schedule = Schedule.objects.get(id=schedule_id)
+        team_worker = TeamWorker.objects.filter(team=schedule.team).last()
+        if team_worker:
+            queue_name = f"execute-schedule-{team_worker.suffix_worker_name}"
+        else:
+            queue_name = "execute-schedule"
         execute_schedule.apply_async(
-            kwargs={"schedule_id": schedule_id}, queue="execute-schedule"
+            kwargs={"schedule_id": schedule_id}, queue=queue_name
         )
 
     def update_step_actions(self, schedule: Schedule, actions_id: List):
@@ -92,6 +103,23 @@ class ScheduleBusiness(pydantic.BaseModel):
         if user:
             object_list = object_list.filter(team__in=get_user_team(user))
         return object_list
+
+    def create_task(self, schedule: Schedule):
+        team_worker = TeamWorker.objects.filter(team=schedule.team).first()
+        if team_worker:
+            queue_name = f"execute-schedule-{team_worker.suffix_worker_name}"
+        else:
+            queue_name = "execute-schedule"
+
+        tasks.execute_schedule.apply_async(
+            kwargs={
+                "schedule_id": schedule.id,
+            },
+            queue=queue_name,
+        )
+
+        schedule.last_execution = timezone.now()
+        schedule.save()
 
 
 class ScheduleEnvironmentVariableBusiness(pydantic.BaseModel):
@@ -244,15 +272,6 @@ class TicketBusiness(pydantic.BaseModel):
     def get_ticket_parameters(self, ticket_id: int):
         return TicketParameter.objects.filter(ticket__id=ticket_id)
 
-    def reprocess_ticket(self, ticket_id: int):
-        ticket = self.get(ticket_id)
-        ticket.execution_status = EXECUTION_STATUS_QUEUE
-        ticket.save()
-        process_ticket.apply_async(
-            kwargs={"ticket_id": ticket.id}, queue="process-ticket"
-        )
-        return ticket
-
     def get_query_set(self, params: Dict, user=None):
         name = params.get("name")
         order_by = params.get("order_by", "-id")
@@ -267,3 +286,27 @@ class TicketBusiness(pydantic.BaseModel):
         if user:
             object_list = object_list.filter(schedule__team__in=get_user_team(user))
         return object_list
+
+    def create(self, schedule: Schedule, schedule_execution: ScheduleExecution):
+        return self.model_class.objects.create(
+            schedule=schedule, schedule_execution=schedule_execution
+        )
+
+    def create_task(
+        self, ticket: Ticket, list_action_order_to_process: List = [], seconds_delay=0
+    ):
+        team_worker = TeamWorker.objects.filter(team=ticket.schedule.team).first()
+        if team_worker:
+            queue_name = f"process-ticket-{team_worker.suffix_worker_name}"
+        else:
+            queue_name = "process-ticket"
+
+        ticket.execution_status = EXECUTION_STATUS_QUEUE
+        ticket.save()
+        tasks.process_ticket.apply_async(
+            kwargs={
+                "ticket_id": ticket.id,
+            },
+            queue=queue_name,
+            countdown=seconds_delay,
+        )
