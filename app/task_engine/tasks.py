@@ -7,6 +7,7 @@ from celery.utils.log import get_task_logger
 from cron_validator import CronScheduler
 from datetime import timedelta
 
+from task_engine import business
 from task_engine.models import (
     Schedule,
     ScheduleEnvironmentVariable,
@@ -17,7 +18,6 @@ from task_engine.models import (
     ScheduleExecution,
 )
 from task_engine.choices import (
-    EXECUTION_STATUS_PENDING,
     EXECUTION_STATUS_PROCESSING,
     EXECUTION_STATUS_SUCCESS,
     EXECUTION_STATUS_ERROR,
@@ -50,9 +50,8 @@ def search_new_schedule():
                 scheduler.time_for_execution()
                 and cron_execution_time != last_execution_to_compare_cron
             ):
-                execute_schedule.delay(schedule.id)
-                schedule.last_execution = timezone.now()
-                schedule.save()
+                schedule_business = business.ScheduleBusiness.factory()
+                schedule_business.create_task(schedule=schedule)
         elif (
             schedule.last_execution is None
             or timezone.now()
@@ -62,9 +61,8 @@ def search_new_schedule():
             + timedelta(hours=schedule.hours)
             - timedelta(seconds=1)
         ):
-            execute_schedule.delay(schedule.id)
-            schedule.last_execution = timezone.now()
-            schedule.save()
+            schedule_business = business.ScheduleBusiness.factory()
+            schedule_business.create_task(schedule=schedule)
 
 
 @task
@@ -79,7 +77,9 @@ def execute_schedule(schedule_id, **kwargs):
     for environment_variable in environment_variables:
         parameters["ENV"][environment_variable.name] = environment_variable.load_value
     logger.info(schedule.name)
-    status, data_list, execution_log = schedule.script.execute(parameters)
+    status, data_list, execution_log, control_value = schedule.script.execute(
+        parameters
+    )
     schedule_execution_status = (
         EXECUTION_STATUS_SUCCESS if status else EXECUTION_STATUS_ERROR
     )
@@ -93,16 +93,20 @@ def execute_schedule(schedule_id, **kwargs):
         isinstance(data_list, list)
         and StepSchedule.objects.filter(schedule=schedule).exists()
     ):
+        ticket_business = business.TicketBusiness.factory()
         for data in data_list:
             ticket = Ticket.objects.create(
                 schedule=schedule, schedule_execution=schedule_execution
             )
             for key, value in data.items():
                 TicketParameter.objects.create(ticket=ticket, name=key, value=value)
-            ticket.execution_status = EXECUTION_STATUS_QUEUE
-            ticket.save()
-            process_ticket.delay(ticket.id)
+
+            ticket_business.create_task(ticket)
             ticket_created = True
+
+    if control_value:
+        schedule.last_value = control_value
+        schedule.save()
 
     if (
         settings.EXECUTION_NOTIFICATION_ENABLED
@@ -114,6 +118,7 @@ def execute_schedule(schedule_id, **kwargs):
 
 @task
 def process_ticket(ticket_id):
+    ticket_business = business.TicketBusiness.factory()
     ticket = Ticket.objects.get(id=ticket_id)
     ticket.execution_status = EXECUTION_STATUS_PROCESSING
     ticket.save()
@@ -133,7 +138,7 @@ def process_ticket(ticket_id):
     )
 
     for step in steps:
-        status, data, execution_log = step.action.script.execute(parameters)
+        status, data, execution_log, _ = step.action.script.execute(parameters)
         TicketActionLog.objects.create(
             ticket=ticket, action=step.action, execution_log=execution_log
         )
