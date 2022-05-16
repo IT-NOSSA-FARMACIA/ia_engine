@@ -118,7 +118,7 @@ class FunctionService(models.Model):
                 if isinstance(response_data, tuple):
                     return_data, status_code = response_data
                 else:
-                    return_data = return_data
+                    return_data = response_data
                     status_code = 200
             except Exception as ex:
                 status_code = 400
