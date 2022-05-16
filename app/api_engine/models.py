@@ -111,11 +111,15 @@ class FunctionService(models.Model):
     def execute(self, request, customer=None, *args, **kwargs) -> Any:
         stdout = StringIO()
         stderr = StringIO()
-        status_code = 200
         with redirect_stdout(stdout):
             exec(self.code, globals())
             try:
-                return_data = main(request, *args, **kwargs)
+                response_data = main(request, *args, **kwargs)
+                if isinstance(return_data, tuple):
+                    return_data, status_code = response_data
+                else:
+                    return_data = return_data
+                    status_code = 200
             except Exception as ex:
                 status_code = 400
                 return_data = {"error": str(ex)}
