@@ -51,7 +51,10 @@ def schedule_execution_pending(time_to_search: int, user) -> int:
 
 def schedule_execution_processing(time_to_search: int, user) -> int:
     schedule_execution = ScheduleExecution.objects.filter(
-        execution_status=EXECUTION_STATUS_PROCESSING,
+        execution_status__in=(
+            EXECUTION_STATUS_PROCESSING,
+            EXECUTION_STATUS_CREATING_TICKET,
+        ),
         execution_date__gt=datetime.now().date() - timedelta(time_to_search),
         schedule__team__in=get_user_team(user),
     ).count()
@@ -104,10 +107,7 @@ def ticket_execution_queue(time_to_search: int, user) -> int:
 
 def ticket_execution_processing(time_to_search: int, user) -> int:
     tickets = Ticket.objects.filter(
-        execution_status__in=(
-            EXECUTION_STATUS_PROCESSING,
-            EXECUTION_STATUS_CREATING_TICKET,
-        ),
+        execution_status=EXECUTION_STATUS_PROCESSING,
         created_date_ticket__gt=datetime.now().date() - timedelta(time_to_search),
         schedule__team__in=get_user_team(user),
     ).count()
