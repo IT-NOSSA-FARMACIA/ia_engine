@@ -315,6 +315,7 @@ class ReprocessTicketView(View):
             list_action_order_to_process=request.POST.getlist(
                 "list_action_order_to_process"
             ),
+            reprocess=True
         )
         messages.success(request, "Ticket enviado para reprocessamento.")
         return redirect(reverse("task_engine:ticket", args=(ticket.id,)))
