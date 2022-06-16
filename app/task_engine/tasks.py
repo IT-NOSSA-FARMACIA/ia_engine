@@ -16,12 +16,13 @@ from task_engine.models import (
     TicketParameter,
     TicketActionLog,
     ScheduleExecution,
+    TeamWorker,
 )
 from task_engine.choices import (
     EXECUTION_STATUS_PROCESSING,
     EXECUTION_STATUS_SUCCESS,
     EXECUTION_STATUS_ERROR,
-    EXECUTION_STATUS_QUEUE,
+    EXECUTION_STATUS_CREATING_TICKET,
 )
 from task_engine.notification import Notification
 
@@ -66,9 +67,8 @@ def search_new_schedule():
             schedule_business = business.ScheduleBusiness.factory()
             schedule_business.create_task(schedule=schedule)
 
-
 @task
-def execute_schedule(schedule_id, **kwargs):
+def execute_schedule_v1(schedule_id, **kwargs):
     logger.info("starting task sync_new_calls")
     schedule = Schedule.objects.get(id=schedule_id)
     environment_variables = ScheduleEnvironmentVariable.objects.filter(
@@ -105,6 +105,85 @@ def execute_schedule(schedule_id, **kwargs):
 
             ticket_business.create_task(ticket)
             ticket_created = True
+
+    if control_value:
+        schedule.last_value = control_value
+        schedule.save()
+
+    if (
+        settings.EXECUTION_NOTIFICATION_ENABLED
+        and (status and not ticket_created)
+        or not status
+    ):
+        notify_execution.delay(schedule_execution_id=schedule_execution.id)
+
+
+@task
+def execute_schedule(schedule_id, **kwargs):
+    logger.info("starting task sync_new_calls")
+    schedule = Schedule.objects.get(id=schedule_id)
+    schedule_execution = ScheduleExecution.objects.create(schedule=schedule)
+    environment_variables = ScheduleEnvironmentVariable.objects.filter(
+        schedule=schedule
+    )
+    parameters = kwargs
+    parameters["ENV"] = {}
+    for environment_variable in environment_variables:
+        parameters["ENV"][environment_variable.name] = environment_variable.load_value
+    logger.info(schedule.name)
+    schedule_execution.execution_status = EXECUTION_STATUS_PROCESSING
+    schedule_execution.save()
+    status, data_list, execution_log, control_value = schedule.script.execute(
+        parameters
+    )
+    schedule_execution.execution_log = execution_log
+    schedule_execution.save()
+
+    ticket_created = False
+    if (
+        isinstance(data_list, list)
+        and StepSchedule.objects.filter(schedule=schedule).exists()
+    ):
+        schedule_execution.execution_status = EXECUTION_STATUS_CREATING_TICKET
+        schedule_execution.save()
+        ticket_business = business.TicketBusiness.factory()
+
+        bulk_data_ticket_parameter = []
+        list_bulk_data_ticket_parameter = []
+        bulk_data_ticket = []
+        for data in data_list:
+            bulk_data_ticket.append(
+                Ticket(schedule=schedule, schedule_execution=schedule_execution)
+            )
+
+            list_bulk_data_ticket_parameter.append(
+                [TicketParameter(name=key, value=value) for key, value in data.items()]
+            )
+
+        for indice in range(0, len(bulk_data_ticket) + 1, 100):
+            Ticket.objects.bulk_create(bulk_data_ticket[indice : indice + 100])
+
+        position = 0
+        team_worker = TeamWorker.objects.filter(team=schedule.team).first() or ""
+        for ticket in Ticket.objects.filter(
+            schedule=schedule, schedule_execution=schedule_execution
+        ):
+            for bulk_data_ticket_parameter in list_bulk_data_ticket_parameter[position]:
+                bulk_data_ticket_parameter.ticket = ticket
+
+            TicketParameter.objects.bulk_create(
+                list_bulk_data_ticket_parameter[position]
+            )
+            position += 1
+            ticket_business.create_task(ticket=ticket, team_worker=team_worker)
+
+        ticket_created = True
+
+    if not status:
+        schedule_execution.execution_status = EXECUTION_STATUS_ERROR
+    else:
+        schedule_execution.execution_status = EXECUTION_STATUS_SUCCESS
+    schedule_execution.save()
 
     if control_value:
         schedule.last_value = control_value
@@ -159,12 +238,14 @@ def process_ticket(ticket_id, list_action_order_to_process: List = None):
                     )
                 if retry_ticket := data.get("retry_ticket"):
                     list_action_order_to_process = data.get(
-                        "step_actions_to_process", ticket_business.get_list_step_actions_forward(step)
+                        "step_actions_to_process",
+                        ticket_business.get_list_step_actions_forward(step),
                     )
                     ticket_business.create_task(
                         ticket=ticket,
                         list_action_order_to_process=list_action_order_to_process,
                         seconds_delay=retry_ticket,
+                        reprocess=True,
                     )
                     break
         else:
