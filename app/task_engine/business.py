@@ -302,17 +302,19 @@ class TicketBusiness(pydantic.BaseModel):
         ]
 
     def create_task(
-        self, ticket: Ticket, list_action_order_to_process: List = None, seconds_delay=0
+        self, ticket: Ticket, list_action_order_to_process: List = None, seconds_delay=0, team_worker=None, reprocess=False
     ):
         if not list_action_order_to_process:
             list_action_order_to_process = []
-        team_worker = TeamWorker.objects.filter(team=ticket.schedule.team).first()
+        if team_worker is None:
+            team_worker = TeamWorker.objects.filter(team=ticket.schedule.team).first()
+            
         if team_worker:
             queue_name = f"process-ticket-{team_worker.suffix_worker_name}"
         else:
             queue_name = "process-ticket"
 
-        if TicketActionLog.objects.filter(ticket=ticket).exists():
+        if reprocess:
             ticket.execution_status = EXECUTION_STATUS_QUEUE_RETRY
         else:
             ticket.execution_status = EXECUTION_STATUS_QUEUE
