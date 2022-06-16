@@ -6,6 +6,7 @@ from task_engine.choices import (
     EXECUTION_STATUS_QUEUE_RETRY,
     EXECUTION_STATUS_PENDING,
     EXECUTION_STATUS_PROCESSING,
+    EXECUTION_STATUS_CREATING_TICKET,
 )
 from core.utils import get_user_team
 
@@ -103,7 +104,10 @@ def ticket_execution_queue(time_to_search: int, user) -> int:
 
 def ticket_execution_processing(time_to_search: int, user) -> int:
     tickets = Ticket.objects.filter(
-        execution_status=EXECUTION_STATUS_PROCESSING,
+        execution_status__in=(
+            EXECUTION_STATUS_PROCESSING,
+            EXECUTION_STATUS_CREATING_TICKET,
+        ),
         created_date_ticket__gt=datetime.now().date() - timedelta(time_to_search),
         schedule__team__in=get_user_team(user),
     ).count()
