@@ -198,6 +198,7 @@ class Ticket(models.Model):
     execution_status = models.CharField(
         max_length=2, choices=EXECUTION_STATUS_CHOICE, default=EXECUTION_STATUS_PENDING
     )
+    external_id = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self) -> str:
         return f"{self.id} - {self.schedule.name} - {self.execution_status}"
