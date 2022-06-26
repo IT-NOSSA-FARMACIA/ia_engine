@@ -35,6 +35,13 @@
                             </a>
                         </th>
                         <th>
+                            <a class="text-green" href="{% order_by_href "id" request.GET.order_by request.GET.name %}">
+                            {% order_by "external_id" request.GET.order_by as arrow_external_id %}
+                            {{ arrow_external_id | safe}}
+                            External ID 
+                            </a>
+                        </th>
+                        <th>
                             <a class="text-green"  href="{% order_by_href "schedule__name" request.GET.order_by request.GET.name %}">
                             {% order_by "schedule__name" request.GET.order_by as arrow_schedule %}
                             {{ arrow_schedule | safe}}
@@ -68,6 +75,13 @@
                     {% for ticket in object_list %}
                         <tr>
                             <td>{{ ticket.get_html_hyperlink|safe }}</a></td>
+                            <td>
+                                {% if ticket.external_id %}
+                                   {{ ticket.external_id }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
                             <td>{{ ticket.schedule.get_html_hyperlink | safe }}</td>
                             <td>{{ ticket.created_date_ticket }}</td>
                             <td>{{ ticket.schedule.team.name }}</td>
