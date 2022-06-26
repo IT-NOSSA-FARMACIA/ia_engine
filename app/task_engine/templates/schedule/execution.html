@@ -114,6 +114,7 @@
                                 <thead>
                                     <tr>
                                         <th>Ticket ID</th>
+                                        <th>External ID</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -121,6 +122,13 @@
                                 {% for ticket in tickets %}
                                 <tr>
                                     <td><a href="#">{{ ticket.get_html_hyperlink|safe }}</a></td>
+                                    <td>
+                                        {% if ticket.external_id %}
+                                           {{ ticket.external_id }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
                                     <td>
                                     <span class="badge {% badge_status_execution ticket.execution_status %}">{{ ticket.get_execution_status_display }}</span>
                                     </td>
