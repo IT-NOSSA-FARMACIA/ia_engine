@@ -212,8 +212,11 @@ def process_ticket(ticket_id, list_action_order_to_process: List = None):
     for environment_variable in environment_variables:
         parameters["ENV"][environment_variable.name] = environment_variable.load_value
     ticket_parameters = TicketParameter.objects.filter(ticket=ticket)
+    external_id = None
     for ticket_parameter in ticket_parameters:
         parameters[ticket_parameter.name] = ticket_parameter.value
+        if ticket_parameter.name == "external_id":
+            external_id = ticket_parameter.value
     parameters["ticket_id"] = ticket.id
 
     filter_step_schedule = {"schedule": ticket.schedule}
@@ -223,6 +226,10 @@ def process_ticket(ticket_id, list_action_order_to_process: List = None):
     steps = StepSchedule.objects.filter(**filter_step_schedule).order_by(
         "execution_order"
     )
+
+    if external_id:
+        ticket.external_id = external_id
+        ticket.save()
 
     for step in steps:
         status, data, execution_log, _ = step.action.script.execute(parameters)
