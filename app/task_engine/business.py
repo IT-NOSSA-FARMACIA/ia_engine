@@ -280,6 +280,7 @@ class TicketBusiness(pydantic.BaseModel):
             object_list = self.model_class.objects.filter(
                 Q(schedule__name__icontains=name)
                 | Q(schedule__description__icontains=name)
+                | Q(external_id=name)
             )
         else:
             object_list = self.model_class.objects.filter().order_by(order_by)
